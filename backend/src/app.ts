@@ -16,6 +16,8 @@ Sentry.init({ dsn: process.env.SENTRY_DSN });
 
 const app = express();
 
+import { globalApiRateLimiter } from "./middleware/rateLimiter";
+
 app.use(
   cors({
     credentials: true,
@@ -24,6 +26,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
+app.use(globalApiRateLimiter);
 app.use(Sentry.Handlers.requestHandler());
 app.use("/public", express.static(uploadConfig.directory));
 app.use(routes);
