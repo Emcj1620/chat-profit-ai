@@ -97,7 +97,7 @@ const CreateUserService = async ({
     });
     await Setting.create({
       key: "appName",
-      value: `${name}'s System`,
+      value: "Chat Profit AI",
       tenantId: actualTenantId
     });
     await Setting.create({

@@ -16,7 +16,7 @@ export const ThemeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY);
   const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY);
-  const [appName, setAppName] = useState("WhaTicket");
+  const [appName, setAppName] = useState("Chat Profit AI");
   const [appLogoLight, setAppLogoLight] = useState("");
   const [appLogoDark, setAppLogoDark] = useState("");
   const [appFavicon, setAppFavicon] = useState("");
@@ -138,7 +138,7 @@ export const useThemeContext = () => {
     return {
       darkMode: false,
       toggleTheme: () => {},
-      appName: "WhaTicket",
+      appName: "Chat Profit AI",
       appLogoLight: "",
       appLogoDark: "",
       appFavicon: "",

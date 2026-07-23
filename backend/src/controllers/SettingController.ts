@@ -66,6 +66,17 @@ export const publicIndex = async (
   ];
   const publicSettings = settings.filter(s => publicKeys.includes(s.key));
 
+  const appNameSetting = publicSettings.find(s => s.key === "appName");
+  if (!appNameSetting || appNameSetting.value === "WhaTicket" || appNameSetting.value.includes("'s System")) {
+    if (appNameSetting) {
+      appNameSetting.value = "Chat Profit AI";
+      Setting.update({ value: "Chat Profit AI" }, { where: { id: appNameSetting.id } }).catch(() => {});
+    } else {
+      const created = await Setting.create({ key: "appName", value: "Chat Profit AI", tenantId });
+      publicSettings.push(created);
+    }
+  }
+
   return res.status(200).json(publicSettings);
 };
 

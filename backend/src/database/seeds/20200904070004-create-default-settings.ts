@@ -28,7 +28,7 @@ module.exports = {
         },
         {
           key: "appName",
-          value: "WhaTicket",
+          value: "Chat Profit AI",
           tenantId: 1,
           createdAt: new Date(),
           updatedAt: new Date()
