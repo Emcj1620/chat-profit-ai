@@ -81,6 +81,26 @@ export const publicIndex = async (
     }
   }
 
+  const defaultAssets: Record<string, string> = {
+    appLogoLight: "chat_profit_logo.png",
+    appLogoDark: "chat_profit_logo.png",
+    appFavicon: "chat_profit_favicon.png",
+    appBackground: "chat_profit_bg.png"
+  };
+
+  for (const [key, defaultVal] of Object.entries(defaultAssets)) {
+    let settingItem = publicSettings.find(s => s.key === key);
+    if (!settingItem || !settingItem.value) {
+      if (settingItem) {
+        settingItem.value = defaultVal;
+        Setting.update({ value: defaultVal }, { where: { id: settingItem.id } }).catch(() => {});
+      } else {
+        const created = await Setting.create({ key, value: defaultVal, tenantId });
+        publicSettings.push(created);
+      }
+    }
+  }
+
   return res.status(200).json(publicSettings);
 };
 

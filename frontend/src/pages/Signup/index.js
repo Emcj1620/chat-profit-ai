@@ -96,31 +96,27 @@ const SignUp = () => {
 		}
 	};
 
-	const logoName = (darkMode && appLogoDark) ? appLogoDark : appLogoLight;
-	const logoUrl = logoName ? `${getBackendUrl()}public/${logoName}` : null;
-	const bgUrl = appBackground ? `${getBackendUrl()}public/${appBackground}` : null;
+	// Fallback permanente: usa o arquivo na raiz se o banco não tiver configuração
+	const logoName = (darkMode && appLogoDark) ? appLogoDark : (appLogoLight || "chat_profit_logo.png");
+	const logoUrl = `${getBackendUrl()}public/${logoName}`;
+	const bgFileName = appBackground || "chat_profit_bg.png";
+	const bgUrl = `${getBackendUrl()}public/${bgFileName}`;
 
-	const rootStyle = bgUrl
-		? { backgroundImage: `url(${bgUrl})` }
-		: { background: darkMode ? "linear-gradient(135deg, #121212 0%, #1e1e2f 100%)" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" };
+	const rootStyle = {
+		backgroundImage: `url(${bgUrl}), url(/bg_auth.png)`
+	};
 
 	return (
 		<div className={classes.root} style={rootStyle}>
 			<CssBaseline />
 			<Container component="main" maxWidth="xs">
 				<Paper className={classes.cardContainer} elevation={6}>
-					{logoUrl ? (
-						<img
-							src={logoUrl}
-							alt={appName}
-							style={{ maxHeight: "70px", maxWidth: "260px", width: "auto", margin: "10px auto 20px auto", display: "block" }}
-							onError={(e) => { e.target.style.display = 'none'; }}
-						/>
-					) : (
-						<Avatar className={classes.avatar}>
-							<LockOutlined />
-						</Avatar>
-					)}
+					<img
+						src={logoUrl}
+						alt={appName}
+						style={{ maxHeight: "70px", maxWidth: "260px", width: "auto", margin: "10px auto 20px auto", display: "block" }}
+						onError={(e) => { e.target.src = "/logo.png"; }}
+					/>
 					<Typography component="h1" variant="h5" style={{ fontWeight: 600, marginBottom: "10px" }}>
 						{i18n.t("signup.title")}
 					</Typography>

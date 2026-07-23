@@ -17,10 +17,10 @@ export const ThemeProvider = ({ children }) => {
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY);
   const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY);
   const [appName, setAppName] = useState("Chat Profit AI");
-  const [appLogoLight, setAppLogoLight] = useState("");
-  const [appLogoDark, setAppLogoDark] = useState("");
-  const [appFavicon, setAppFavicon] = useState("");
-  const [appBackground, setAppBackground] = useState("");
+  const [appLogoLight, setAppLogoLight] = useState("chat_profit_logo.png");
+  const [appLogoDark, setAppLogoDark] = useState("chat_profit_logo.png");
+  const [appFavicon, setAppFavicon] = useState("chat_profit_favicon.png");
+  const [appBackground, setAppBackground] = useState("chat_profit_bg.png");
   const [darkModeBgColor, setDarkModeBgColor] = useState("#0B0F14");
   const [headerBgColor, setHeaderBgColor] = useState("");
   const [sidebarTextColor, setSidebarTextColor] = useState("");
