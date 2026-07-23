@@ -1,7 +1,13 @@
 import path from "path";
 import multer from "multer";
 
+import fs from "fs";
+
 const publicFolder = path.resolve(__dirname, "..", "..", "public");
+if (!fs.existsSync(publicFolder)) {
+  fs.mkdirSync(publicFolder, { recursive: true });
+}
+
 export default {
   directory: publicFolder,
 

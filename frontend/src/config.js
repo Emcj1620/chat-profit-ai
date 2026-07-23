@@ -8,7 +8,9 @@ function getConfig(name, defaultValue = null) {
 }
 
 export function getBackendUrl() {
-  return getConfig("VITE_BACKEND_URL");
+  const url = getConfig("VITE_BACKEND_URL", "https://api.zapprofit.com.br/");
+  if (!url) return "https://api.zapprofit.com.br/";
+  return url.endsWith("/") ? url : `${url}/`;
 }
 
 export function getHoursCloseTicketsAuto() {

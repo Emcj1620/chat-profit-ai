@@ -23,6 +23,28 @@ import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import { ThemeProvider } from "../context/DarkMode";
 import Route from "./Route";
 
+const PrivateRoutes = () => (
+  <WhatsAppsProvider>
+    <LoggedInLayout>
+      <Switch>
+        <Route exact path="/" component={Dashboard} isPrivate />
+        <Route exact path="/tickets/:ticketId?" component={Tickets} isPrivate />
+        <Route exact path="/connections" component={Connections} isPrivate />
+        <Route exact path="/contacts" component={Contacts} isPrivate />
+        <Route exact path="/campaigns" component={Campaigns} isPrivate />
+        <Route exact path="/users" component={Users} isPrivate />
+        <Route exact path="/quickAnswers" component={QuickAnswers} isPrivate />
+        <Route exact path="/settings" component={Settings} isPrivate />
+        <Route exact path="/queues" component={Queues} isPrivate />
+        <Route exact path="/subscription" component={Subscription} isPrivate />
+        <Route exact path="/kanban" component={Kanban} isPrivate />
+        <Route exact path="/chatflows" component={ChatFlows} isPrivate />
+        <Route exact path="/flowbuilder/:id" component={FlowBuilder} isPrivate />
+      </Switch>
+    </LoggedInLayout>
+  </WhatsAppsProvider>
+);
+
 const Routes = () => {
   return (
     <BrowserRouter>
@@ -31,23 +53,7 @@ const Routes = () => {
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
-            <WhatsAppsProvider>
-              <LoggedInLayout>
-                <Route exact path="/" component={Dashboard} isPrivate />
-                <Route exact path="/tickets/:ticketId?" component={Tickets} isPrivate />
-                <Route exact path="/connections" component={Connections} isPrivate />
-                <Route exact path="/contacts" component={Contacts} isPrivate />
-                <Route exact path="/campaigns" component={Campaigns} isPrivate />
-                <Route exact path="/users" component={Users} isPrivate />
-                <Route exact path="/quickAnswers" component={QuickAnswers} isPrivate />
-                <Route exact path="/settings" component={Settings} isPrivate />
-                <Route exact path="/queues" component={Queues} isPrivate />
-                <Route exact path="/subscription" component={Subscription} isPrivate />
-                <Route exact path="/kanban" component={Kanban} isPrivate />
-                <Route exact path="/chatflows" component={ChatFlows} isPrivate />
-                <Route exact path="/flowbuilder/:id" component={FlowBuilder} isPrivate />
-              </LoggedInLayout>
-            </WhatsAppsProvider>
+            <Route path="/" component={PrivateRoutes} />
           </Switch>
           <ToastContainer autoClose={3000} />
         </ThemeProvider>
