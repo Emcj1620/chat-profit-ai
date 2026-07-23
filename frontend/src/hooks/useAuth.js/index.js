@@ -18,8 +18,11 @@ const useAuth = () => {
 		config => {
 			const token = localStorage.getItem("token");
 			if (token) {
-				config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
-				setIsAuth(true);
+				try {
+					config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
+				} catch (e) {
+					localStorage.removeItem("token");
+				}
 			}
 			return config;
 		},
@@ -37,12 +40,18 @@ const useAuth = () => {
 			if (error?.response?.status === 403 && !originalRequest._retry) {
 				originalRequest._retry = true;
 
-				const { data } = await api.post("/auth/refresh_token");
-				if (data) {
-					localStorage.setItem("token", JSON.stringify(data.token));
-					api.defaults.headers.Authorization = `Bearer ${data.token}`;
+				try {
+					const { data } = await api.post("/auth/refresh_token");
+					if (data) {
+						localStorage.setItem("token", JSON.stringify(data.token));
+						api.defaults.headers.Authorization = `Bearer ${data.token}`;
+					}
+					return api(originalRequest);
+				} catch (e) {
+					localStorage.removeItem("token");
+					api.defaults.headers.Authorization = undefined;
+					setIsAuth(false);
 				}
-				return api(originalRequest);
 			}
 			if (error?.response?.status === 401) {
 				localStorage.removeItem("token");
@@ -63,8 +72,13 @@ const useAuth = () => {
 					setIsAuth(true);
 					setUser(data.user);
 				} catch (err) {
-					toastError(err);
+					localStorage.removeItem("token");
+					api.defaults.headers.Authorization = undefined;
+					setIsAuth(false);
+					setUser({});
 				}
+			} else {
+				setIsAuth(false);
 			}
 			setLoading(false);
 		})();
