@@ -1,7 +1,10 @@
 node_modules
 public/*
-dist
 !public/.gitkeep
+!public/chat_profit_logo.png
+!public/chat_profit_favicon.png
+!public/chat_profit_bg.png
+dist
 .env
 .env.test
 
