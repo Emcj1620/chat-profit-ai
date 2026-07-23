@@ -16,11 +16,11 @@ const Route = ({ component: Component, isPrivate = false, ...rest }) => {
     );
   }
 
-  if (isAuth && !isPrivate) {
+  if (isAuth && !isPrivate && (rest.location?.pathname === "/login" || rest.location?.pathname === "/signup")) {
     return (
       <>
         {loading && <BackdropLoading />}
-        <Redirect to={{ pathname: "/", state: { from: rest.location } }} />;
+        <Redirect to={{ pathname: "/", state: { from: rest.location } }} />
       </>
     );
   }
