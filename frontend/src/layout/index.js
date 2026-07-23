@@ -143,7 +143,7 @@ const LoggedInLayout = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
-  const { darkMode, toggleTheme, appName, appLogoLight } = useThemeContext();
+  const { darkMode, toggleTheme, appName, appLogoLight, appLogoDark } = useThemeContext();
   const [subscriptionBlocked, setSubscriptionBlocked] = useState(false);
 
   useEffect(() => {
@@ -260,11 +260,12 @@ const LoggedInLayout = ({ children }) => {
             <MenuIcon />
           </IconButton>
           <div className={classes.title}>
-            {appLogoLight ? (
+            {((darkMode && appLogoDark) || appLogoLight) ? (
               <img
-                src={`${getBackendUrl()}public/${appLogoLight}`}
+                src={`${getBackendUrl()}public/${(darkMode && appLogoDark) ? appLogoDark : appLogoLight}`}
                 alt={appName}
                 style={{ height: "36px", width: "auto", display: "block" }}
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
             ) : (
               <Typography

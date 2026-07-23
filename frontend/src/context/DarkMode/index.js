@@ -20,6 +20,7 @@ export const ThemeProvider = ({ children }) => {
   const [appLogoLight, setAppLogoLight] = useState("");
   const [appLogoDark, setAppLogoDark] = useState("");
   const [appFavicon, setAppFavicon] = useState("");
+  const [appBackground, setAppBackground] = useState("");
   const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   const { isAuth, user } = useContext(AuthContext);
@@ -36,48 +37,49 @@ export const ThemeProvider = ({ children }) => {
     if (links.length > 0) {
       links.forEach(link => {
         link.href = faviconUrl;
-        link.type = "image/png";
       });
     } else {
       const link = document.createElement("link");
       link.rel = "icon";
       link.href = faviconUrl;
-      link.type = "image/png";
       document.head.appendChild(link);
     }
   };
 
-  useEffect(() => {
-    const fetchThemeSettings = async () => {
-      try {
-        const tenantId = isAuth && user?.tenantId ? user.tenantId : 1;
-        const { data } = await api.get(`/settings/public?tenantId=${tenantId}`);
+  const fetchThemeSettings = async () => {
+    try {
+      const tenantId = isAuth && user?.tenantId ? user.tenantId : 1;
+      const { data } = await api.get(`/settings/public?tenantId=${tenantId}`);
 
-        const primary = data.find(s => s.key === "primaryColor");
-        const secondary = data.find(s => s.key === "secondaryColor");
-        const name = data.find(s => s.key === "appName");
-        const logoLight = data.find(s => s.key === "appLogoLight");
-        const logoDark = data.find(s => s.key === "appLogoDark");
-        const favicon = data.find(s => s.key === "appFavicon");
+      const primary = data.find(s => s.key === "primaryColor");
+      const secondary = data.find(s => s.key === "secondaryColor");
+      const name = data.find(s => s.key === "appName");
+      const logoLight = data.find(s => s.key === "appLogoLight");
+      const logoDark = data.find(s => s.key === "appLogoDark");
+      const favicon = data.find(s => s.key === "appFavicon");
+      const bg = data.find(s => s.key === "appBackground");
 
-        if (primary && primary.value) setPrimaryColor(primary.value);
-        if (secondary && secondary.value) setSecondaryColor(secondary.value);
-        if (name && name.value) {
-          setAppName(name.value);
-          document.title = name.value;
-        }
-        if (logoLight) setAppLogoLight(logoLight.value || "");
-        if (logoDark) setAppLogoDark(logoDark.value || "");
-        if (favicon && favicon.value) {
-          setAppFavicon(favicon.value);
-          updateFavicon(favicon.value);
-        }
-        setSettingsLoaded(true);
-      } catch (err) {
-        console.error("Error loading theme settings:", err);
-        setSettingsLoaded(true);
+      if (primary && primary.value) setPrimaryColor(primary.value);
+      if (secondary && secondary.value) setSecondaryColor(secondary.value);
+      if (name && name.value) {
+        setAppName(name.value);
+        document.title = name.value;
       }
-    };
+      if (logoLight) setAppLogoLight(logoLight.value || "");
+      if (logoDark) setAppLogoDark(logoDark.value || "");
+      if (bg) setAppBackground(bg.value || "");
+      if (favicon && favicon.value) {
+        setAppFavicon(favicon.value);
+        updateFavicon(favicon.value);
+      }
+      setSettingsLoaded(true);
+    } catch (err) {
+      console.error("Error loading theme settings:", err);
+      setSettingsLoaded(true);
+    }
+  };
+
+  useEffect(() => {
     fetchThemeSettings();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuth, user?.tenantId]);
@@ -111,8 +113,10 @@ export const ThemeProvider = ({ children }) => {
     appLogoLight,
     appLogoDark,
     appFavicon,
+    appBackground,
     settingsLoaded,
-  }), [darkMode, appName, appLogoLight, appLogoDark, appFavicon, settingsLoaded]);
+    fetchThemeSettings,
+  }), [darkMode, appName, appLogoLight, appLogoDark, appFavicon, appBackground, settingsLoaded]);
 
   return (
     <ThemeContext.Provider value={contextValue}>

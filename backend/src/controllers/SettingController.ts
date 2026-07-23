@@ -61,7 +61,8 @@ export const publicIndex = async (
     "appName",
     "appLogoLight",
     "appLogoDark",
-    "appFavicon"
+    "appFavicon",
+    "appBackground"
   ];
   const publicSettings = settings.filter(s => publicKeys.includes(s.key));
 
@@ -76,13 +77,17 @@ export const uploadLogo = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
   const file = req.file;
-  const { mode } = req.body; // 'light', 'dark' or 'favicon'
+  const { mode } = req.body; // 'light', 'dark', 'favicon' or 'background'
 
   if (!file) {
     throw new AppError("ERR_NO_FILE_UPLOADED", 400);
   }
 
-  const settingKey = mode === "favicon" ? "appFavicon" : (mode === "dark" ? "appLogoDark" : "appLogoLight");
+  let settingKey = "appLogoLight";
+  if (mode === "favicon") settingKey = "appFavicon";
+  else if (mode === "dark") settingKey = "appLogoDark";
+  else if (mode === "background") settingKey = "appBackground";
+  else if (mode === "light") settingKey = "appLogoLight";
   const tenantId = req.user.tenantId;
 
   let setting = await Setting.findOne({
