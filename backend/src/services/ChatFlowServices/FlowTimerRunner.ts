@@ -10,11 +10,9 @@ const checkDelayedTickets = async (): Promise<void> => {
     const tickets = await Ticket.findAll({
       where: {
         timerDelayUntil: {
-          [Op.and]: [
-            { [Op.ne]: null },
-            { [Op.lte]: new Date() }
-          ]
-        }
+          [Op.ne]: null,
+          [Op.lte]: new Date()
+        } as any
       }
     });
 
