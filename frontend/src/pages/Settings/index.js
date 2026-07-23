@@ -215,7 +215,7 @@ const Settings = () => {
 									type="color"
 									id="primaryColor-setting"
 									name="primaryColor"
-									value={getSettingValue("primaryColor") || "#2576d2"}
+									value={getSettingValue("primaryColor") || "#7c4dff"}
 									onChange={handleChangeSetting}
 									style={{ cursor: "pointer", border: "none", width: 44, height: 44, borderRadius: 8 }}
 								/>
@@ -228,7 +228,59 @@ const Settings = () => {
 									type="color"
 									id="secondaryColor-setting"
 									name="secondaryColor"
-									value={getSettingValue("secondaryColor") || "#1565c0"}
+									value={getSettingValue("secondaryColor") || "#ff4081"}
+									onChange={handleChangeSetting}
+									style={{ cursor: "pointer", border: "none", width: 44, height: 44, borderRadius: 8 }}
+								/>
+							</Box>
+						</Grid>
+						<Grid item xs={12} sm={6}>
+							<Box display="flex" alignItems="center" justifyContent="space-between">
+								<Typography variant="body1">Fundo no Modo Escuro</Typography>
+								<input
+									type="color"
+									id="darkModeBgColor-setting"
+									name="darkModeBgColor"
+									value={getSettingValue("darkModeBgColor") || "#121212"}
+									onChange={handleChangeSetting}
+									style={{ cursor: "pointer", border: "none", width: 44, height: 44, borderRadius: 8 }}
+								/>
+							</Box>
+						</Grid>
+						<Grid item xs={12} sm={6}>
+							<Box display="flex" alignItems="center" justifyContent="space-between">
+								<Typography variant="body1">Barra Superior (Header)</Typography>
+								<input
+									type="color"
+									id="headerBgColor-setting"
+									name="headerBgColor"
+									value={getSettingValue("headerBgColor") || "#1e1e2f"}
+									onChange={handleChangeSetting}
+									style={{ cursor: "pointer", border: "none", width: 44, height: 44, borderRadius: 8 }}
+								/>
+							</Box>
+						</Grid>
+						<Grid item xs={12} sm={6}>
+							<Box display="flex" alignItems="center" justifyContent="space-between">
+								<Typography variant="body1">Fundo do Menu Lateral</Typography>
+								<input
+									type="color"
+									id="sidebarBgColor-setting"
+									name="sidebarBgColor"
+									value={getSettingValue("sidebarBgColor") || "#1e1e2f"}
+									onChange={handleChangeSetting}
+									style={{ cursor: "pointer", border: "none", width: 44, height: 44, borderRadius: 8 }}
+								/>
+							</Box>
+						</Grid>
+						<Grid item xs={12} sm={6}>
+							<Box display="flex" alignItems="center" justifyContent="space-between">
+								<Typography variant="body1">Texto & Ícones do Menu</Typography>
+								<input
+									type="color"
+									id="sidebarTextColor-setting"
+									name="sidebarTextColor"
+									value={getSettingValue("sidebarTextColor") || "#ffffff"}
 									onChange={handleChangeSetting}
 									style={{ cursor: "pointer", border: "none", width: 44, height: 44, borderRadius: 8 }}
 								/>

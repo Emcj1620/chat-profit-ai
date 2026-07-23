@@ -62,7 +62,11 @@ export const publicIndex = async (
     "appLogoLight",
     "appLogoDark",
     "appFavicon",
-    "appBackground"
+    "appBackground",
+    "darkModeBgColor",
+    "headerBgColor",
+    "sidebarTextColor",
+    "sidebarBgColor"
   ];
   const publicSettings = settings.filter(s => publicKeys.includes(s.key));
 

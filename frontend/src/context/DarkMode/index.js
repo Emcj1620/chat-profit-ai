@@ -21,6 +21,10 @@ export const ThemeProvider = ({ children }) => {
   const [appLogoDark, setAppLogoDark] = useState("");
   const [appFavicon, setAppFavicon] = useState("");
   const [appBackground, setAppBackground] = useState("");
+  const [darkModeBgColor, setDarkModeBgColor] = useState("#121212");
+  const [headerBgColor, setHeaderBgColor] = useState("");
+  const [sidebarTextColor, setSidebarTextColor] = useState("");
+  const [sidebarBgColor, setSidebarBgColor] = useState("");
   const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   const { isAuth, user } = useContext(AuthContext);
@@ -58,6 +62,10 @@ export const ThemeProvider = ({ children }) => {
       const logoDark = data.find(s => s.key === "appLogoDark");
       const favicon = data.find(s => s.key === "appFavicon");
       const bg = data.find(s => s.key === "appBackground");
+      const darkBg = data.find(s => s.key === "darkModeBgColor");
+      const headerBg = data.find(s => s.key === "headerBgColor");
+      const sbText = data.find(s => s.key === "sidebarTextColor");
+      const sbBg = data.find(s => s.key === "sidebarBgColor");
 
       if (primary && primary.value) setPrimaryColor(primary.value);
       if (secondary && secondary.value) setSecondaryColor(secondary.value);
@@ -68,6 +76,10 @@ export const ThemeProvider = ({ children }) => {
       if (logoLight) setAppLogoLight(logoLight.value || "");
       if (logoDark) setAppLogoDark(logoDark.value || "");
       if (bg) setAppBackground(bg.value || "");
+      if (darkBg && darkBg.value) setDarkModeBgColor(darkBg.value);
+      if (headerBg) setHeaderBgColor(headerBg.value || "");
+      if (sbText) setSidebarTextColor(sbText.value || "");
+      if (sbBg) setSidebarBgColor(sbBg.value || "");
       if (favicon && favicon.value) {
         setAppFavicon(favicon.value);
         updateFavicon(favicon.value);
@@ -101,9 +113,13 @@ export const ThemeProvider = ({ children }) => {
           type: darkMode ? "dark" : "light",
           primary: { main: primaryColor },
           secondary: { main: secondaryColor },
+          background: {
+            default: darkMode ? (darkModeBgColor || "#121212") : "#f5f5f5",
+            paper: darkMode ? (darkModeBgColor ? `${darkModeBgColor}` : "#1e1e1e") : "#ffffff",
+          }
         },
       }),
-    [darkMode, primaryColor, secondaryColor]
+    [darkMode, primaryColor, secondaryColor, darkModeBgColor]
   );
 
   const contextValue = useMemo(() => ({
@@ -114,9 +130,13 @@ export const ThemeProvider = ({ children }) => {
     appLogoDark,
     appFavicon,
     appBackground,
+    darkModeBgColor,
+    headerBgColor,
+    sidebarTextColor,
+    sidebarBgColor,
     settingsLoaded,
     fetchThemeSettings,
-  }), [darkMode, appName, appLogoLight, appLogoDark, appFavicon, appBackground, settingsLoaded]);
+  }), [darkMode, appName, appLogoLight, appLogoDark, appFavicon, appBackground, darkModeBgColor, headerBgColor, sidebarTextColor, sidebarBgColor, settingsLoaded]);
 
   return (
     <ThemeContext.Provider value={contextValue}>
@@ -143,6 +163,10 @@ export const useThemeContext = () => {
       appLogoDark: "",
       appFavicon: "",
       appBackground: "",
+      darkModeBgColor: "#121212",
+      headerBgColor: "",
+      sidebarTextColor: "",
+      sidebarBgColor: "",
       settingsLoaded: true,
       fetchThemeSettings: () => {}
     };

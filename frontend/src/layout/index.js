@@ -143,7 +143,7 @@ const LoggedInLayout = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
-  const { darkMode, toggleTheme, appName, appLogoLight, appLogoDark } = useThemeContext();
+  const { darkMode, toggleTheme, appName, appLogoLight, appLogoDark, headerBgColor, sidebarBgColor, sidebarTextColor } = useThemeContext();
   const [subscriptionBlocked, setSubscriptionBlocked] = useState(false);
 
   useEffect(() => {
@@ -225,10 +225,16 @@ const LoggedInLayout = ({ children }) => {
             !drawerOpen && classes.drawerPaperClose
           ),
         }}
+        PaperProps={{
+          style: {
+            backgroundColor: sidebarBgColor || undefined,
+            color: sidebarTextColor || undefined
+          }
+        }}
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
+          <IconButton onClick={() => setDrawerOpen(!drawerOpen)} style={{ color: sidebarTextColor || "inherit" }}>
             <ChevronLeftIcon />
           </IconButton>
         </div>
@@ -246,6 +252,7 @@ const LoggedInLayout = ({ children }) => {
       <AppBar
         position="absolute"
         className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
+        style={{ backgroundColor: headerBgColor || undefined }}
       >
         <Toolbar variant="dense" className={classes.toolbar}>
           <IconButton

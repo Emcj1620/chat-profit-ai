@@ -21,10 +21,11 @@ import SendIcon from "@material-ui/icons/Send";
 
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
-import { AuthContext } from "../context/Auth/AuthContext";
+import { useThemeContext } from "../context/DarkMode";
 
 function ListItemLink(props) {
   const { icon, primary, to, className } = props;
+  const { sidebarTextColor } = useThemeContext();
 
   const renderLink = React.useMemo(
     () =>
@@ -37,8 +38,15 @@ function ListItemLink(props) {
   return (
     <li>
       <ListItem button component={renderLink} className={className}>
-        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-        <ListItemText primary={primary} />
+        {icon ? (
+          <ListItemIcon style={{ color: sidebarTextColor || "inherit" }}>
+            {icon}
+          </ListItemIcon>
+        ) : null}
+        <ListItemText
+          primary={primary}
+          primaryTypographyProps={{ style: { color: sidebarTextColor || "inherit" } }}
+        />
       </ListItem>
     </li>
   );
