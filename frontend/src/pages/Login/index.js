@@ -12,7 +12,8 @@ import {
   Container,
   InputAdornment,
   IconButton,
-  Link
+  Link,
+  Paper
 } from '@material-ui/core';
 
 import { LockOutlined, Visibility, VisibilityOff } from '@material-ui/icons';

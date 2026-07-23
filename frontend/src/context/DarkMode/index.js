@@ -132,4 +132,20 @@ ThemeProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export const useThemeContext = () => useContext(ThemeContext);
+export const useThemeContext = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    return {
+      darkMode: false,
+      toggleTheme: () => {},
+      appName: "WhaTicket",
+      appLogoLight: "",
+      appLogoDark: "",
+      appFavicon: "",
+      appBackground: "",
+      settingsLoaded: true,
+      fetchThemeSettings: () => {}
+    };
+  }
+  return context;
+};
