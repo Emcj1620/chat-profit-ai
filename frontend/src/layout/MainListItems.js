@@ -21,6 +21,7 @@ import SendIcon from "@material-ui/icons/Send";
 
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
+import { AuthContext } from "../context/Auth/AuthContext";
 import { useThemeContext } from "../context/DarkMode";
 
 function ListItemLink(props) {
