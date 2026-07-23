@@ -7,6 +7,8 @@ import Dashboard from "../pages/Dashboard/";
 import Tickets from "../pages/Tickets/";
 import Signup from "../pages/Signup/";
 import Login from "../pages/Login/";
+import ForgetPassword from "../pages/ForgetPassword/";
+import ResetPassword from "../pages/ResetPassword/";
 import Connections from "../pages/Connections/";
 import Settings from "../pages/Settings/";
 import Users from "../pages/Users";
@@ -53,6 +55,8 @@ const Routes = () => {
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
+            <Route exact path="/forget-password" component={ForgetPassword} />
+            <Route exact path="/reset-password" component={ResetPassword} />
             <Route path="/" component={PrivateRoutes} isPrivate />
           </Switch>
           <ToastContainer autoClose={3000} />

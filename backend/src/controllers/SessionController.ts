@@ -49,3 +49,31 @@ export const remove = async (
 
   return res.send();
 };
+
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new AppError("O e-mail é obrigatório.", 400);
+  }
+
+  const SendResetPasswordEmailService = (await import("../services/AuthServices/SendResetPasswordEmailService")).default;
+  await SendResetPasswordEmailService(email);
+
+  return res.status(200).json({ message: "E-mail de redefinição enviado com sucesso." });
+};
+
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { token, password } = req.body;
+
+  const ResetPasswordService = (await import("../services/AuthServices/ResetPasswordService")).default;
+  await ResetPasswordService({ token, password });
+
+  return res.status(200).json({ message: "Senha redefinida com sucesso!" });
+};

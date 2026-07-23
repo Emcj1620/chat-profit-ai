@@ -56,6 +56,12 @@ class User extends Model<User> {
   @Column
   profile: string;
 
+  @Column
+  resetPasswordToken: string;
+
+  @Column
+  resetPasswordExpires: Date;
+
   @ForeignKey(() => Whatsapp)
   @Column
   whatsappId: number;

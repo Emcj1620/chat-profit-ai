@@ -16,7 +16,8 @@ const Route = ({ component: Component, isPrivate = false, ...rest }) => {
     );
   }
 
-  if (isAuth && !isPrivate && (rest.location?.pathname === "/login" || rest.location?.pathname === "/signup")) {
+  const publicAuthPaths = ["/login", "/signup", "/forget-password", "/reset-password"];
+  if (isAuth && !isPrivate && publicAuthPaths.includes(rest.location?.pathname)) {
     return (
       <>
         {loading && <BackdropLoading />}

@@ -9,7 +9,9 @@ authRoutes.post("/signup", UserController.store);
 
 authRoutes.post("/login", SessionController.store);
 
-authRoutes.post("/refresh_token", SessionController.update);
+authRoutes.post("/forgot-password", SessionController.forgotPassword);
+
+authRoutes.post("/reset-password", SessionController.resetPassword);
 
 authRoutes.delete("/logout", isAuth, SessionController.remove);
 

@@ -168,7 +168,17 @@ const Login = () => {
             >
               {i18n.t("login.buttons.submit")}
             </Button>
-            <Grid container>
+            <Grid container justify="space-between" style={{ marginTop: "10px" }}>
+              <Grid item>
+                <Link
+                  href="#"
+                  variant="body2"
+                  component={RouterLink}
+                  to="/forget-password"
+                >
+                  Esqueci minha senha
+                </Link>
+              </Grid>
               <Grid item>
                 <Link
                   href="#"
