@@ -8,9 +8,9 @@ import { getBackendUrl } from "../../config";
 
 const ThemeContext = createContext();
 
-// Cores padrão originais do Whaticket
-const DEFAULT_PRIMARY = "#7c4dff";
-const DEFAULT_SECONDARY = "#ff4081";
+// Cores padrão oficiais da paleta Chat Profit AI
+const DEFAULT_PRIMARY = "#28C76F";
+const DEFAULT_SECONDARY = "#0084FF";
 
 export const ThemeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
@@ -21,7 +21,7 @@ export const ThemeProvider = ({ children }) => {
   const [appLogoDark, setAppLogoDark] = useState("");
   const [appFavicon, setAppFavicon] = useState("");
   const [appBackground, setAppBackground] = useState("");
-  const [darkModeBgColor, setDarkModeBgColor] = useState("#121212");
+  const [darkModeBgColor, setDarkModeBgColor] = useState("#0B0F14");
   const [headerBgColor, setHeaderBgColor] = useState("");
   const [sidebarTextColor, setSidebarTextColor] = useState("");
   const [sidebarBgColor, setSidebarBgColor] = useState("");
