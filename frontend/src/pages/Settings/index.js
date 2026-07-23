@@ -127,8 +127,8 @@ const Settings = () => {
 	};
 
 	const getSettingValue = key => {
-		const { value } = settings.find(s => s.key === key);
-		return value;
+		const setting = Array.isArray(settings) && settings.find(s => s.key === key);
+		return setting ? setting.value : "";
 	};
 
 	return (
@@ -171,7 +171,7 @@ const Settings = () => {
 						margin="dense"
 						variant="outlined"
 						fullWidth
-						value={settings && settings.length > 0 && getSettingValue("userApiToken")}
+						value={settings && settings.length > 0 && (getSettingValue("apiToken") || getSettingValue("userApiToken"))}
 					/>
 				</Paper>
 
