@@ -21,6 +21,7 @@ import CreateContactService from "../services/ContactServices/CreateContactServi
 
 import { whatsappProvider } from "../providers/WhatsApp/whatsappProvider";
 import { MessageType, MessageAck } from "../providers/WhatsApp/types";
+import { GptService } from "../services/GptServices/GptService";
 
 const writeFileAsync = promisify(writeFile);
 
@@ -223,12 +224,17 @@ export const handleMessage = async (
   try {
     const processedMessage = processLocationMessage(messagePayload);
 
+    // Fetch the whatsapp record first to get tenantId for multi-tenant support
+    const whatsapp = await ShowWhatsAppService(contextPayload.whatsappId);
+    const { tenantId } = whatsapp;
+
     const contact = await CreateOrUpdateContactService({
       name: contactPayload.name,
       number: contactPayload.number,
       lid: contactPayload.lid,
       profilePicUrl: contactPayload.profilePicUrl,
-      isGroup: contactPayload.isGroup
+      isGroup: contactPayload.isGroup,
+      tenantId
     });
 
     let groupContact: Contact | undefined;
@@ -238,11 +244,11 @@ export const handleMessage = async (
         number: contextPayload.groupContact.number,
         lid: contextPayload.groupContact.lid,
         profilePicUrl: contextPayload.groupContact.profilePicUrl,
-        isGroup: contextPayload.groupContact.isGroup
+        isGroup: contextPayload.groupContact.isGroup,
+        tenantId
       });
     }
 
-    const whatsapp = await ShowWhatsAppService(contextPayload.whatsappId);
     if (
       contextPayload.unreadMessages === 0 &&
       whatsapp.farewellMessage &&
@@ -255,6 +261,7 @@ export const handleMessage = async (
       contact,
       contextPayload.whatsappId,
       contextPayload.unreadMessages,
+      tenantId,
       groupContact
     );
 
@@ -291,9 +298,85 @@ export const handleMessage = async (
 
     await CreateMessageService({ messageData });
 
+    // Intercept with FlowBuilder if configured
+    const activeFlowId = ticket.flowId || whatsapp.flowId;
+    if (
+      activeFlowId &&
+      !processedMessage.fromMe &&
+      !contextPayload.groupContact &&
+      !ticket.userId
+    ) {
+      if (!ticket.flowId) {
+        // First message starting the flow! Assign flowId and start
+        await ticket.update({
+          flowId: activeFlowId,
+          flowNodeId: null,
+          flowState: JSON.stringify({})
+        });
+      }
+
+      // Execute FlowRunner
+      const { RunFlow } = require("../services/ChatFlowServices/FlowRunner");
+      await RunFlow(ticket, processedMessage.body);
+      return; // Skip standard queue choices and GPT
+    }
+
     await processVcardMessage(processedMessage);
 
     if (
+      whatsapp.gptEnabled &&
+      whatsapp.gptApiKey &&
+      !contextPayload.groupContact &&
+      !processedMessage.fromMe &&
+      !ticket.userId
+    ) {
+      // Obter últimas 10 mensagens para contexto de conversa
+      const ticketMessages = await Message.findAll({
+        where: { ticketId: ticket.id },
+        order: [["createdAt", "ASC"]],
+        limit: 10
+      });
+
+      const formattedHistory = ticketMessages.map(m => ({
+        role: m.fromMe ? ("assistant" as const) : ("user" as const),
+        content: m.body
+      }));
+
+      try {
+        const reply = await GptService({
+          apiKey: whatsapp.gptApiKey,
+          model: whatsapp.gptModel,
+          prompt: whatsapp.gptPrompt,
+          guidelines: whatsapp.gptGuidelines,
+          temperature: whatsapp.gptTemperature,
+          messages: formattedHistory
+        });
+
+        if (reply) {
+          const sentMessage = await whatsappProvider.sendMessage(
+            contextPayload.whatsappId,
+            `${contactPayload.number}@c.us`,
+            reply
+          );
+
+          const replyMessageData = {
+            id: sentMessage.id,
+            ticketId: ticket.id,
+            contactId: undefined,
+            body: reply,
+            fromMe: true,
+            read: true,
+            mediaType: "chat",
+            ack: 1
+          };
+
+          await CreateMessageService({ messageData: replyMessageData });
+          await ticket.update({ lastMessage: reply });
+        }
+      } catch (err) {
+        logger.error(`Error in GPT auto-response: ${err.message}`);
+      }
+    } else if (
       !ticket.queue &&
       !contextPayload.groupContact &&
       !processedMessage.fromMe &&

@@ -12,12 +12,20 @@ import {
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Ticket from "./Ticket";
+import Tenant from "./Tenant";
 
 @Table
 class Message extends Model<Message> {
   @PrimaryKey
   @Column
   id: string;
+
+  @ForeignKey(() => Tenant)
+  @Column
+  tenantId: number;
+
+  @BelongsTo(() => Tenant)
+  tenant: Tenant;
 
   @Default(0)
   @Column

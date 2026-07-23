@@ -16,11 +16,11 @@ interface Request {
   email?: string;
   profilePicUrl?: string;
   extraInfo?: ExtraInfo[];
+  tenantId: number;
 }
 
 const emitContact = (action: "update" | "create", contact: Contact) => {
   const io = getIO();
-
   io.emit("contact", { action, contact });
 };
 
@@ -31,14 +31,15 @@ const CreateOrUpdateContactService = async ({
   profilePicUrl,
   isGroup,
   email = "",
-  extraInfo = []
+  extraInfo = [],
+  tenantId
 }: Request): Promise<Contact> => {
   const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
   if (!number && !lid) throw new Error("Either number or lid must be provided");
 
   const [contactByNumber, contactByLid] = await Promise.all([
-    number ? Contact.findOne({ where: { number } }) : null,
-    lid ? Contact.findOne({ where: { lid } }) : null
+    number ? Contact.findOne({ where: { number, tenantId } }) : null,
+    lid ? Contact.findOne({ where: { lid, tenantId } }) : null
   ]);
 
   const shouldMerge =
@@ -64,7 +65,6 @@ const CreateOrUpdateContactService = async ({
     });
 
     emitContact("update", contactByNumber);
-
     return contactByNumber;
   }
 
@@ -75,7 +75,6 @@ const CreateOrUpdateContactService = async ({
     });
 
     emitContact("update", contactByNumber);
-
     return contactByNumber;
   }
 
@@ -96,7 +95,8 @@ const CreateOrUpdateContactService = async ({
     profilePicUrl,
     email,
     isGroup,
-    extraInfo
+    extraInfo,
+    tenantId
   });
 
   emitContact("create", created);

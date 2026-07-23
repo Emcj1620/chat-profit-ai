@@ -20,7 +20,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   const { users, count, hasMore } = await ListUsersService({
     searchParam,
-    pageNumber
+    pageNumber,
+    tenantId: req.user.tenantId
   });
 
   return res.json({ users, count, hasMore });
@@ -38,13 +39,16 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
+  const tenantId = req.url === "/signup" ? undefined : req.user.tenantId;
+
   const user = await CreateUserService({
     email,
     password,
     name,
     profile,
     queueIds,
-    whatsappId
+    whatsappId,
+    tenantId
   });
 
   const io = getIO();
@@ -59,7 +63,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { userId } = req.params;
 
-  const user = await ShowUserService(userId);
+  const user = await ShowUserService(userId, req.user.tenantId);
 
   return res.status(200).json(user);
 };
@@ -75,7 +79,7 @@ export const update = async (
   const { userId } = req.params;
   const userData = req.body;
 
-  const user = await UpdateUserService({ userData, userId });
+  const user = await UpdateUserService({ userData, userId, tenantId: req.user.tenantId });
 
   const io = getIO();
   io.emit("user", {
@@ -96,7 +100,7 @@ export const remove = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  await DeleteUserService(userId);
+  await DeleteUserService(userId, req.user.tenantId);
 
   const io = getIO();
   io.emit("user", {

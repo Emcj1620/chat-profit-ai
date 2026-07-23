@@ -4,3 +4,6 @@ ssl/
 .wwebjs_auth
 .wwebjs_cache
 .idea
+*.sqlite
+scratch/
+backend/scratch/

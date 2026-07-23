@@ -6,7 +6,7 @@ module.exports = {
       type: DataTypes.STRING,
       allowNull: true,
       defaultValue: null,
-      unique: true
+      unique: process.env.DB_DIALECT === "sqlite" ? false : true
     });
   },
 

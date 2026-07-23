@@ -16,6 +16,7 @@ interface UserData {
 interface Request {
   userData: UserData;
   userId: string | number;
+  tenantId?: number;
 }
 
 interface Response {
@@ -27,9 +28,10 @@ interface Response {
 
 const UpdateUserService = async ({
   userData,
-  userId
+  userId,
+  tenantId
 }: Request): Promise<Response | undefined> => {
-  const user = await ShowUserService(userId);
+  const user = await ShowUserService(userId, tenantId);
 
   const schema = Yup.object().shape({
     name: Yup.string().min(2),

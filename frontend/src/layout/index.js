@@ -12,7 +12,12 @@ import {
   IconButton,
   Menu,
   Switch,
+  Paper,
+  Button,
+  Container,
 } from "@material-ui/core";
+import { useLocation, useHistory } from "react-router-dom";
+import api from "../services/api";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import AccountCircle from "@material-ui/icons/AccountCircle";
@@ -23,6 +28,7 @@ import NotificationsPopOver from "../components/NotificationsPopOver";
 import UserModal from "../components/UserModal";
 import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
+import { getBackendUrl } from "../config";
 import { i18n } from "../translate/i18n";
 import { useThemeContext } from "../context/DarkMode";
 
@@ -128,6 +134,8 @@ const useStyles = makeStyles((theme) => ({
 
 const LoggedInLayout = ({ children }) => {
   const classes = useStyles();
+  const location = useLocation();
+  const history = useHistory();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -135,7 +143,32 @@ const LoggedInLayout = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
-  const { darkMode, toggleTheme } = useThemeContext();
+  const { darkMode, toggleTheme, appName, appLogoLight } = useThemeContext();
+  const [subscriptionBlocked, setSubscriptionBlocked] = useState(false);
+
+  useEffect(() => {
+    const checkSubscriptionStatus = async () => {
+      try {
+        const { data } = await api.get("/subscription");
+        const isExpired = data.dueDate && new Date(data.dueDate) < new Date();
+        const isSuspended = data.subscriptionStatus === "suspended";
+        // Bloqueia apenas se a assinatura estiver suspensa
+        // ou se estiver em trial E com dueDate expirado
+        if (isSuspended || (data.subscriptionStatus === "trialing" && isExpired)) {
+          setSubscriptionBlocked(true);
+        } else {
+          setSubscriptionBlocked(false);
+        }
+      } catch (err) {
+        console.error("Error checking subscription in layout:", err);
+        setSubscriptionBlocked(false);
+      }
+    };
+
+    if (user?.id) {
+      checkSubscriptionStatus();
+    }
+  }, [user, location.pathname]);
 
   useEffect(() => {
     if (document.body.offsetWidth > 600) {
@@ -226,14 +259,23 @@ const LoggedInLayout = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography
-            component="h1"
-            variant="h6"
-            noWrap
-            className={classes.title}
-          >
-            WhaTicket
-          </Typography>
+          <div className={classes.title}>
+            {appLogoLight ? (
+              <img
+                src={`${getBackendUrl()}public/${appLogoLight}`}
+                alt={appName}
+                style={{ height: "36px", width: "auto", display: "block" }}
+              />
+            ) : (
+              <Typography
+                component="h1"
+                variant="h6"
+                noWrap
+              >
+                {appName}
+              </Typography>
+            )}
+          </div>
 
           <div className={classes.themeSwitchContainer}>
             <Brightness4Icon className={classes.themeIcon} />
@@ -286,7 +328,28 @@ const LoggedInLayout = ({ children }) => {
       </AppBar>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-        {children ? children : null}
+        {subscriptionBlocked && location.pathname !== "/subscription" ? (
+          <Container style={{ marginTop: 40, textAlign: "center" }}>
+            <Paper style={{ padding: 40 }} elevation={3}>
+              <Typography variant="h5" color="secondary" gutterBottom style={{ fontWeight: "bold" }}>
+                Acesso Bloqueado / Assinatura Expirada
+              </Typography>
+              <Typography variant="body1" paragraph>
+                O prazo de pagamento da sua assinatura venceu. Para continuar utilizando todos os recursos do sistema, por favor efetue o pagamento.
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                size="large"
+                onClick={() => history.push("/subscription")}
+              >
+                Ir para Tela de Assinatura
+              </Button>
+            </Paper>
+          </Container>
+        ) : (
+          children ? children : null
+        )}
       </main>
     </div>
   );

@@ -40,6 +40,11 @@ export interface WhatsappProvider {
     chatId: string,
     limit: number
   ): Promise<ProviderMessage[]>;
+  sendPresenceState(
+    sessionId: number,
+    chatId: string,
+    state: "typing" | "recording" | "clear"
+  ): Promise<void>;
 }
 
 const provider = process.env.WHATSAPP_PROVIDER || "wwebjs";

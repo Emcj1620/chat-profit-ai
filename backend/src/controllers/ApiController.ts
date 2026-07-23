@@ -31,7 +31,8 @@ interface ContactData {
 
 const createContact = async (
   whatsappId: number | undefined,
-  newContact: string
+  newContact: string,
+  tenantId: number
 ) => {
   await CheckIsValidContact(newContact);
 
@@ -45,7 +46,8 @@ const createContact = async (
     name: `${number}`,
     number,
     profilePicUrl,
-    isGroup: false
+    isGroup: false,
+    tenantId
   };
 
   const contact = await CreateOrUpdateContactService(contactData);
@@ -53,7 +55,7 @@ const createContact = async (
   let whatsapp: Whatsapp | null;
 
   if (whatsappId === undefined) {
-    whatsapp = await GetDefaultWhatsApp();
+    whatsapp = await GetDefaultWhatsApp(undefined, tenantId);
   } else {
     whatsapp = await Whatsapp.findByPk(whatsappId);
 
@@ -62,7 +64,7 @@ const createContact = async (
     }
   }
 
-  const createTicket = await FindOrCreateTicketService(contact, whatsapp.id, 1);
+  const createTicket = await FindOrCreateTicketService(contact, whatsapp.id, 1, tenantId);
 
   const ticket = await ShowTicketService(createTicket.id);
 
@@ -76,6 +78,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId }: WhatsappData = req.body;
   const { body, quotedMsg }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
+  const { tenantId } = req.user;
 
   newContact.number = newContact.number.replace("-", "").replace(" ", "");
 
@@ -91,7 +94,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  const contactAndTicket = await createContact(whatsappId, newContact.number);
+  const contactAndTicket = await createContact(whatsappId, newContact.number, tenantId);
 
   if (medias) {
     await Promise.all(

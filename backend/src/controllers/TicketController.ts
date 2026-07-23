@@ -54,7 +54,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     showAll,
     userId,
     queueIds,
-    withUnreadMessages
+    withUnreadMessages,
+    tenantId: req.user.tenantId
   });
 
   return res.status(200).json({ tickets, count, hasMore });
@@ -62,8 +63,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { contactId, status, userId }: TicketData = req.body;
+  const { tenantId } = req.user;
 
-  const ticket = await CreateTicketService({ contactId, status, userId });
+  const ticket = await CreateTicketService({ contactId, status, userId, tenantId });
 
   const io = getIO();
   io.to(ticket.status).emit("ticket", {

@@ -13,6 +13,11 @@ import Users from "../pages/Users";
 import Contacts from "../pages/Contacts/";
 import QuickAnswers from "../pages/QuickAnswers/";
 import Queues from "../pages/Queues/";
+import Subscription from "../pages/Subscription/";
+import Kanban from "../pages/Kanban/";
+import Campaigns from "../pages/Campaigns/";
+import ChatFlows from "../pages/ChatFlows/";
+import FlowBuilder from "../pages/FlowBuilder/";
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import { ThemeProvider } from "../context/DarkMode";
@@ -32,10 +37,15 @@ const Routes = () => {
                 <Route exact path="/tickets/:ticketId?" component={Tickets} isPrivate />
                 <Route exact path="/connections" component={Connections} isPrivate />
                 <Route exact path="/contacts" component={Contacts} isPrivate />
+                <Route exact path="/campaigns" component={Campaigns} isPrivate />
                 <Route exact path="/users" component={Users} isPrivate />
                 <Route exact path="/quickAnswers" component={QuickAnswers} isPrivate />
-                <Route exact path="/Settings" component={Settings} isPrivate />
-                <Route exact path="/Queues" component={Queues} isPrivate />
+                <Route exact path="/settings" component={Settings} isPrivate />
+                <Route exact path="/queues" component={Queues} isPrivate />
+                <Route exact path="/subscription" component={Subscription} isPrivate />
+                <Route exact path="/kanban" component={Kanban} isPrivate />
+                <Route exact path="/chatflows" component={ChatFlows} isPrivate />
+                <Route exact path="/flowbuilder/:id" component={FlowBuilder} isPrivate />
               </LoggedInLayout>
             </WhatsAppsProvider>
           </Switch>

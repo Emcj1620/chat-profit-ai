@@ -7,6 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
 import { toast } from "react-toastify";
 
 import api from "../../services/api";
@@ -87,6 +88,44 @@ const Settings = () => {
 		}
 	};
 
+	const handleUploadLogo = async e => {
+		if (!e.target.files || e.target.files.length === 0) return;
+		const file = e.target.files[0];
+		const formData = new FormData();
+		formData.append("file", file);
+		formData.append("mode", "light");
+
+		try {
+			await api.post("/settings/logo", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data"
+				}
+			});
+			toast.success("Logo atualizado com sucesso!");
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
+	const handleUploadFavicon = async e => {
+		if (!e.target.files || e.target.files.length === 0) return;
+		const file = e.target.files[0];
+		const formData = new FormData();
+		formData.append("file", file);
+		formData.append("mode", "favicon");
+
+		try {
+			await api.post("/settings/logo", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data"
+				}
+			});
+			toast.success("Favicon atualizado com sucesso!");
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
 	const getSettingValue = key => {
 		const { value } = settings.find(s => s.key === key);
 		return value;
@@ -134,6 +173,93 @@ const Settings = () => {
 						fullWidth
 						value={settings && settings.length > 0 && getSettingValue("userApiToken")}
 					/>
+				</Paper>
+
+				<Paper className={classes.paper}>
+					<Typography variant="body1">
+						Cor Primária
+					</Typography>
+					<input
+						type="color"
+						id="primaryColor-setting"
+						name="primaryColor"
+						value={
+							(settings && settings.length > 0 && getSettingValue("primaryColor")) || "#2576d2"
+						}
+						className={classes.settingOption}
+						onChange={handleChangeSetting}
+						style={{ cursor: "pointer", border: "none", width: 40, height: 40, borderRadius: 4 }}
+					/>
+				</Paper>
+
+				<Paper className={classes.paper}>
+					<Typography variant="body1">
+						Cor Secundária
+					</Typography>
+					<input
+						type="color"
+						id="secondaryColor-setting"
+						name="secondaryColor"
+						value={
+							(settings && settings.length > 0 && getSettingValue("secondaryColor")) || "#1565c0"
+						}
+						className={classes.settingOption}
+						onChange={handleChangeSetting}
+						style={{ cursor: "pointer", border: "none", width: 40, height: 40, borderRadius: 4 }}
+					/>
+				</Paper>
+
+				{settings && settings.length > 0 && (
+					<Paper className={classes.paper}>
+						<TextField
+							id="appName-setting"
+							label="Nome da Marca / Sistema"
+							margin="dense"
+							variant="outlined"
+							name="appName"
+							fullWidth
+							defaultValue={getSettingValue("appName")}
+							onBlur={handleChangeSetting}
+						/>
+					</Paper>
+				)}
+
+				<Paper className={classes.paper} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+					<Typography variant="body1">
+						Logotipo da Marca (SVG/PNG)
+					</Typography>
+					<Button
+						variant="contained"
+						component="label"
+						color="primary"
+					>
+						Escolher Logo
+						<input
+							type="file"
+							accept="image/*"
+							hidden
+							onChange={handleUploadLogo}
+						/>
+					</Button>
+				</Paper>
+
+				<Paper className={classes.paper} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+					<Typography variant="body1">
+						Ícone do Navegador (Favicon)
+					</Typography>
+					<Button
+						variant="contained"
+						component="label"
+						color="primary"
+					>
+						Escolher Ícone
+						<input
+							type="file"
+							accept="image/*"
+							hidden
+							onChange={handleUploadFavicon}
+						/>
+					</Button>
 				</Paper>
 
 			</Container>

@@ -6,6 +6,7 @@ import Whatsapp from "../../models/Whatsapp";
 interface Request {
   searchParam?: string;
   pageNumber?: string | number;
+  tenantId?: number;
 }
 
 interface Response {
@@ -16,9 +17,11 @@ interface Response {
 
 const ListUsersService = async ({
   searchParam = "",
-  pageNumber = "1"
+  pageNumber = "1",
+  tenantId = 1
 }: Request): Promise<Response> => {
   const whereCondition = {
+    tenantId,
     [Op.or]: [
       {
         "$User.name$": Sequelize.where(

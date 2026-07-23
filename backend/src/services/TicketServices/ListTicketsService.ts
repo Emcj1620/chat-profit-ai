@@ -17,6 +17,7 @@ interface Request {
   userId: string;
   withUnreadMessages?: string;
   queueIds: number[];
+  tenantId?: number;
 }
 
 interface Response {
@@ -33,7 +34,8 @@ const ListTicketsService = async ({
   date,
   showAll,
   userId,
-  withUnreadMessages
+  withUnreadMessages,
+  tenantId = 1
 }: Request): Promise<Response> => {
   let whereCondition: Filterable["where"] = {
     [Op.or]: [{ userId }, { status: "pending" }],
@@ -136,7 +138,7 @@ const ListTicketsService = async ({
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: tickets } = await Ticket.findAndCountAll({
-    where: whereCondition,
+    where: { ...whereCondition, tenantId },
     include: includeCondition,
     distinct: true,
     limit,

@@ -2,6 +2,7 @@ import * as Yup from "yup";
 
 import AppError from "../../errors/AppError";
 import Whatsapp from "../../models/Whatsapp";
+import Tenant from "../../models/Tenant";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
 
 interface Request {
@@ -11,6 +12,14 @@ interface Request {
   farewellMessage?: string;
   status?: string;
   isDefault?: boolean;
+  tenantId?: number;
+  gptEnabled?: boolean;
+  gptApiKey?: string;
+  gptModel?: string;
+  gptPrompt?: string;
+  gptGuidelines?: string;
+  gptTemperature?: number;
+  flowId?: number;
 }
 
 interface Response {
@@ -24,8 +33,26 @@ const CreateWhatsAppService = async ({
   queueIds = [],
   greetingMessage,
   farewellMessage,
-  isDefault = false
+  isDefault = false,
+  tenantId,
+  gptEnabled = false,
+  gptApiKey,
+  gptModel = "gpt-4o-mini",
+  gptPrompt,
+  gptGuidelines,
+  gptTemperature = 0.7,
+  flowId
 }: Request): Promise<Response> => {
+  if (tenantId) {
+    const tenant = await Tenant.findByPk(tenantId);
+    if (tenant && tenant.maxConnections !== -1) {
+      const connectionsCount = await Whatsapp.count({ where: { tenantId } });
+      if (connectionsCount >= tenant.maxConnections) {
+        throw new AppError("ERR_CONNECTION_LIMIT_EXCEEDED", 400);
+      }
+    }
+  }
+
   const schema = Yup.object().shape({
     name: Yup.string()
       .required()
@@ -36,7 +63,7 @@ const CreateWhatsAppService = async ({
         async value => {
           if (!value) return false;
           const nameExists = await Whatsapp.findOne({
-            where: { name: value }
+            where: { name: value, ...(tenantId ? { tenantId } : {}) }
           });
           return !nameExists;
         }
@@ -58,7 +85,10 @@ const CreateWhatsAppService = async ({
 
   if (isDefault) {
     oldDefaultWhatsapp = await Whatsapp.findOne({
-      where: { isDefault: true }
+      where: { 
+        isDefault: true, 
+        ...(tenantId ? { tenantId } : {}) 
+      }
     });
     if (oldDefaultWhatsapp) {
       await oldDefaultWhatsapp.update({ isDefault: false });
@@ -75,7 +105,15 @@ const CreateWhatsAppService = async ({
       status,
       greetingMessage,
       farewellMessage,
-      isDefault
+      isDefault,
+      tenantId,
+      gptEnabled,
+      gptApiKey,
+      gptModel,
+      gptPrompt,
+      gptGuidelines,
+      gptTemperature,
+      flowId
     },
     { include: ["queues"] }
   );

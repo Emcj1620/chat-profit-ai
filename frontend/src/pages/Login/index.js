@@ -22,6 +22,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { useThemeContext } from "../../context/DarkMode";
+import { getBackendUrl } from "../../config";
 
 // const Copyright = () => {
 // 	return (
@@ -63,6 +65,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const { handleLogin } = useContext(AuthContext);
+  const { appName, appLogoLight } = useThemeContext();
 
   const handleChangeInput = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -73,15 +76,25 @@ const Login = () => {
     handleLogin(user);
   };
 
+  const logoUrl = appLogoLight ? `${getBackendUrl()}public/${appLogoLight}` : null;
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlined />
-        </Avatar>
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={appName}
+            style={{ width: "240px", height: "auto", margin: "20px auto 40px auto", display: "block" }}
+          />
+        ) : (
+          <Avatar className={classes.avatar}>
+            <LockOutlined />
+          </Avatar>
+        )}
         <Typography component="h1" variant="h5">
-          {i18n.t("login.title")}
+          {appName}
         </Typography>
         <form className={classes.form} noValidate onSubmit={handlSubmit}>
           <TextField

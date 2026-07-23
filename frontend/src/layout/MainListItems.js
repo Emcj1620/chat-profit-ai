@@ -15,11 +15,13 @@ import PeopleAltOutlinedIcon from "@material-ui/icons/PeopleAltOutlined";
 import ContactPhoneOutlinedIcon from "@material-ui/icons/ContactPhoneOutlined";
 import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
 import QuestionAnswerOutlinedIcon from "@material-ui/icons/QuestionAnswerOutlined";
+import PaymentIcon from "@material-ui/icons/Payment";
+import ViewWeekIcon from "@material-ui/icons/ViewWeek";
+import SendIcon from "@material-ui/icons/Send";
 
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
-import { Can } from "../components/Can";
 
 function ListItemLink(props) {
   const { icon, primary, to, className } = props;
@@ -47,6 +49,9 @@ const MainListItems = (props) => {
   const { whatsApps } = useContext(WhatsAppsContext);
   const { user } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
+
+  // Verifica se o usuário é admin — protege contra user não carregado ainda
+  const isAdmin = user && user.profile && user.profile.toLowerCase() === "admin";
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -98,37 +103,54 @@ const MainListItems = (props) => {
         icon={<ContactPhoneOutlinedIcon />}
       />
       <ListItemLink
+        to="/campaigns"
+        primary="Campanhas"
+        icon={<SendIcon />}
+      />
+      <ListItemLink
+        to="/kanban"
+        primary="Kanban (CRM)"
+        icon={<ViewWeekIcon />}
+      />
+      <ListItemLink
+        to="/chatflows"
+        primary="Fluxos de Conversa"
+        icon={<AccountTreeOutlinedIcon />}
+      />
+      <ListItemLink
         to="/quickAnswers"
         primary={i18n.t("mainDrawer.listItems.quickAnswers")}
         icon={<QuestionAnswerOutlinedIcon />}
       />
-      <Can
-        role={user.profile}
-        perform="drawer-admin-items:view"
-        yes={() => (
-          <>
-            <Divider />
-            <ListSubheader inset>
-              {i18n.t("mainDrawer.listItems.administration")}
-            </ListSubheader>
-            <ListItemLink
-              to="/users"
-              primary={i18n.t("mainDrawer.listItems.users")}
-              icon={<PeopleAltOutlinedIcon />}
-            />
-            <ListItemLink
-              to="/queues"
-              primary={i18n.t("mainDrawer.listItems.queues")}
-              icon={<AccountTreeOutlinedIcon />}
-            />
-            <ListItemLink
-              to="/settings"
-              primary={i18n.t("mainDrawer.listItems.settings")}
-              icon={<SettingsOutlinedIcon />}
-            />
-          </>
-        )}
-      />
+
+      {isAdmin && (
+        <>
+          <Divider />
+          <ListSubheader inset>
+            {i18n.t("mainDrawer.listItems.administration")}
+          </ListSubheader>
+          <ListItemLink
+            to="/users"
+            primary={i18n.t("mainDrawer.listItems.users")}
+            icon={<PeopleAltOutlinedIcon />}
+          />
+          <ListItemLink
+            to="/queues"
+            primary={i18n.t("mainDrawer.listItems.queues")}
+            icon={<AccountTreeOutlinedIcon />}
+          />
+          <ListItemLink
+            to="/settings"
+            primary={i18n.t("mainDrawer.listItems.settings")}
+            icon={<SettingsOutlinedIcon />}
+          />
+          <ListItemLink
+            to="/subscription"
+            primary="Assinatura"
+            icon={<PaymentIcon />}
+          />
+        </>
+      )}
     </div>
   );
 };

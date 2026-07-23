@@ -5,13 +5,14 @@ import AppError from "../errors/AppError";
 
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
+import Setting from "../models/Setting";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   if (req.user.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  const settings = await ListSettingsService();
+  const settings = await ListSettingsService(req.user.tenantId);
 
   return res.status(200).json(settings);
 };
@@ -28,8 +29,75 @@ export const update = async (
 
   const setting = await UpdateSettingService({
     key,
-    value
+    value,
+    tenantId: req.user.tenantId
   });
+
+  const io = getIO();
+  io.emit("settings", {
+    action: "update",
+    setting
+  });
+
+  return res.status(200).json(setting);
+};
+
+export const publicIndex = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const tenantId = req.query.tenantId ? Number(req.query.tenantId) : 1;
+
+  const settings = await ListSettingsService(tenantId);
+
+  if (!settings) {
+    return res.status(200).json([]);
+  }
+
+  const publicKeys = [
+    "primaryColor",
+    "secondaryColor",
+    "userCreation",
+    "appName",
+    "appLogoLight",
+    "appLogoDark",
+    "appFavicon"
+  ];
+  const publicSettings = settings.filter(s => publicKeys.includes(s.key));
+
+  return res.status(200).json(publicSettings);
+};
+
+export const uploadLogo = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+  const file = req.file;
+  const { mode } = req.body; // 'light', 'dark' or 'favicon'
+
+  if (!file) {
+    throw new AppError("ERR_NO_FILE_UPLOADED", 400);
+  }
+
+  const settingKey = mode === "favicon" ? "appFavicon" : (mode === "dark" ? "appLogoDark" : "appLogoLight");
+  const tenantId = req.user.tenantId;
+
+  let setting = await Setting.findOne({
+    where: { key: settingKey, tenantId }
+  });
+
+  if (setting) {
+    await setting.update({ value: file.filename });
+  } else {
+    setting = await Setting.create({
+      key: settingKey,
+      value: file.filename,
+      tenantId
+    });
+  }
 
   const io = getIO();
   io.emit("settings", {

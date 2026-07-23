@@ -16,6 +16,13 @@ import {
 	TextField,
 	Switch,
 	FormControlLabel,
+	MenuItem,
+	Select,
+	FormControl,
+	InputLabel,
+	Divider,
+	Typography,
+	Grid,
 } from "@material-ui/core";
 
 import api from "../../services/api";
@@ -64,9 +71,17 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 		greetingMessage: "",
 		farewellMessage: "",
 		isDefault: false,
+		gptEnabled: false,
+		gptApiKey: "",
+		gptModel: "gpt-4o-mini",
+		gptPrompt: "",
+		gptGuidelines: "",
+		gptTemperature: 0.7,
+		flowId: ""
 	};
 	const [whatsApp, setWhatsApp] = useState(initialState);
 	const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+	const [chatFlows, setChatFlows] = useState([]);
 
 	useEffect(() => {
 		const fetchSession = async () => {
@@ -74,7 +89,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
 			try {
 				const { data } = await api.get(`whatsapp/${whatsAppId}`);
-				setWhatsApp(data);
+				setWhatsApp({
+					...initialState,
+					...data,
+					flowId: data.flowId || ""
+				});
 
 				const whatsQueueIds = data.queues?.map(queue => queue.id);
 				setSelectedQueueIds(whatsQueueIds);
@@ -82,7 +101,16 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 				toastError(err);
 			}
 		};
+		const fetchFlows = async () => {
+			try {
+				const { data } = await api.get("/chatflows");
+				setChatFlows(data.filter(f => f.isActive));
+			} catch (err) {
+				toastError(err);
+			}
+		};
 		fetchSession();
+		fetchFlows();
 	}, [whatsAppId]);
 
 	const handleSaveWhatsApp = async values => {
@@ -200,6 +228,129 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 									selectedQueueIds={selectedQueueIds}
 									onChange={selectedIds => setSelectedQueueIds(selectedIds)}
 								/>
+
+								<Divider style={{ margin: "20px 0 10px 0" }} />
+
+								<Typography variant="subtitle1" gutterBottom style={{ fontWeight: "bold" }}>
+									Chatbot (Fluxo de Conversa)
+								</Typography>
+
+								<div style={{ marginTop: 8, marginBottom: 12 }}>
+									<FormControl variant="outlined" margin="dense" fullWidth>
+										<InputLabel id="flow-selection-label">Fluxo de Conversa Padrão</InputLabel>
+										<Field
+											as={Select}
+											labelId="flow-selection-label"
+											id="flowId"
+											name="flowId"
+											label="Fluxo de Conversa Padrão"
+										>
+											<MenuItem value=""><em>Nenhum / Desativado</em></MenuItem>
+											{chatFlows.map(f => (
+												<MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>
+											))}
+										</Field>
+									</FormControl>
+								</div>
+
+								<Divider style={{ margin: "20px 0 10px 0" }} />
+								
+								<Typography variant="subtitle1" gutterBottom style={{ fontWeight: "bold" }}>
+									Agente de Inteligência Artificial (ChatGPT)
+								</Typography>
+
+								<div style={{ marginBottom: 12 }}>
+									<FormControlLabel
+										control={
+											<Field
+												as={Switch}
+												color="primary"
+												name="gptEnabled"
+												checked={values.gptEnabled}
+											/>
+										}
+										label="Ativar Agente de IA para esta conexão"
+									/>
+								</div>
+
+								{values.gptEnabled && (
+									<Grid container spacing={2} style={{ marginTop: 8 }}>
+										<Grid item xs={12}>
+											<Field
+												as={TextField}
+												label="OpenAI API Key"
+												name="gptApiKey"
+												type="password"
+												error={touched.gptApiKey && Boolean(errors.gptApiKey)}
+												helperText={touched.gptApiKey && errors.gptApiKey}
+												variant="outlined"
+												margin="dense"
+												fullWidth
+											/>
+										</Grid>
+										<Grid item xs={12} sm={6}>
+											<FormControl variant="outlined" margin="dense" fullWidth>
+												<InputLabel id="gpt-model-label">Modelo</InputLabel>
+												<Field
+													as={Select}
+													labelId="gpt-model-label"
+													id="gptModel"
+													name="gptModel"
+													label="Modelo"
+												>
+													<MenuItem value="gpt-4o-mini">gpt-4o-mini</MenuItem>
+													<MenuItem value="gpt-4o">gpt-4o</MenuItem>
+													<MenuItem value="gpt-3.5-turbo">gpt-3.5-turbo</MenuItem>
+												</Field>
+											</FormControl>
+										</Grid>
+										<Grid item xs={12} sm={6}>
+											<Field
+												as={TextField}
+												label="Temperatura (0 a 1)"
+												name="gptTemperature"
+												type="number"
+												inputProps={{ min: 0, max: 1, step: 0.1 }}
+												InputLabelProps={{ shrink: true }}
+												error={touched.gptTemperature && Boolean(errors.gptTemperature)}
+												helperText={touched.gptTemperature && errors.gptTemperature}
+												variant="outlined"
+												margin="dense"
+												fullWidth
+											/>
+										</Grid>
+										<Grid item xs={12}>
+											<Field
+												as={TextField}
+												label="Comportamento / Persona do Agente de IA"
+												placeholder="Ex: Você é um atendente simpático de suporte da loja..."
+												multiline
+												rows={4}
+												fullWidth
+												name="gptPrompt"
+												error={touched.gptPrompt && Boolean(errors.gptPrompt)}
+												helperText={touched.gptPrompt && errors.gptPrompt}
+												variant="outlined"
+												margin="dense"
+											/>
+										</Grid>
+										<Grid item xs={12}>
+											<Field
+												as={TextField}
+												label="Diretrizes Operacionais (Regras e Restrições)"
+												placeholder="Ex: Nunca ofereça descontos maiores que 10%. Não informe dados de contato pessoal."
+												multiline
+												rows={4}
+												fullWidth
+												name="gptGuidelines"
+												error={touched.gptGuidelines && Boolean(errors.gptGuidelines)}
+												helperText={touched.gptGuidelines && errors.gptGuidelines}
+												variant="outlined"
+												margin="dense"
+											/>
+										</Grid>
+									</Grid>
+								)}
 							</DialogContent>
 							<DialogActions>
 								<Button

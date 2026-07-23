@@ -1519,6 +1519,23 @@ const fetchChatMessages = async (
   }));
 };
 
+const sendPresenceState = async (
+  sessionId: number,
+  chatId: string,
+  state: "typing" | "recording" | "clear"
+): Promise<void> => {
+  try {
+    const wbot = getWbot(sessionId);
+    const toJid = normalizeJid(chatId);
+    let mappedState: any = "paused";
+    if (state === "typing") mappedState = "composing";
+    if (state === "recording") mappedState = "recording";
+    await wbot.sendPresenceUpdate(mappedState, toJid);
+  } catch (err) {
+    logger.error(`Error sending presence update on whaileys: ${err}`);
+  }
+};
+
 export const WhaileysProvider: WhatsappProvider = {
   init,
   removeSession,
@@ -1530,5 +1547,6 @@ export const WhaileysProvider: WhatsappProvider = {
   getProfilePicUrl,
   getContacts,
   sendSeen,
-  fetchChatMessages
+  fetchChatMessages,
+  sendPresenceState
 };

@@ -5,7 +5,7 @@ module.exports = {
     return queryInterface.addColumn("Whatsapps", "name", {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
+      unique: process.env.DB_DIALECT === "sqlite" ? false : true
     });
   },
 

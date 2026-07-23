@@ -11,6 +11,12 @@ import WhatsappQueue from "../models/WhatsappQueue";
 import UserQueue from "../models/UserQueue";
 import QuickAnswer from "../models/QuickAnswer";
 import WppKey from "../models/WppKey";
+import Tenant from "../models/Tenant";
+import KanbanStage from "../models/KanbanStage";
+import Campaign from "../models/Campaign";
+import CampaignContact from "../models/CampaignContact";
+import CampaignWhatsapp from "../models/CampaignWhatsapp";
+import ChatFlow from "../models/ChatFlow";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -19,6 +25,7 @@ const dbConfig = require("../config/database");
 const sequelize = new Sequelize(dbConfig);
 
 const models = [
+  Tenant,
   User,
   Contact,
   Ticket,
@@ -30,7 +37,12 @@ const models = [
   WhatsappQueue,
   UserQueue,
   QuickAnswer,
-  WppKey
+  WppKey,
+  KanbanStage,
+  Campaign,
+  CampaignContact,
+  CampaignWhatsapp,
+  ChatFlow
 ];
 
 sequelize.addModels(models);

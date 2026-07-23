@@ -19,20 +19,29 @@ interface WhatsappData {
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const whatsapps = await ListWhatsAppsService();
+  const { tenantId } = req.user;
+  const whatsapps = await ListWhatsAppsService(tenantId);
 
   return res.status(200).json(whatsapps);
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
+  const { tenantId } = req.user;
   const {
     name,
     status,
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
-  }: WhatsappData = req.body;
+    queueIds,
+    gptEnabled,
+    gptApiKey,
+    gptModel,
+    gptPrompt,
+    gptGuidelines,
+    gptTemperature,
+    flowId
+  }: any = req.body;
 
   const { whatsapp, oldDefaultWhatsapp } = await CreateWhatsAppService({
     name,
@@ -40,7 +49,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
+    queueIds,
+    tenantId,
+    gptEnabled,
+    gptApiKey,
+    gptModel,
+    gptPrompt,
+    gptGuidelines,
+    gptTemperature,
+    flowId
   });
 
   StartWhatsAppSession(whatsapp);
@@ -63,8 +80,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
+  const { tenantId } = req.user;
 
-  const whatsapp = await ShowWhatsAppService(whatsappId);
+  const whatsapp = await ShowWhatsAppService(whatsappId, tenantId);
 
   return res.status(200).json(whatsapp);
 };
@@ -75,10 +93,12 @@ export const update = async (
 ): Promise<Response> => {
   const { whatsappId } = req.params;
   const whatsappData = req.body;
+  const { tenantId } = req.user;
 
   const { whatsapp, oldDefaultWhatsapp } = await UpdateWhatsAppService({
     whatsappData,
-    whatsappId
+    whatsappId,
+    tenantId
   });
 
   const io = getIO();
@@ -102,8 +122,9 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { whatsappId } = req.params;
+  const { tenantId } = req.user;
 
-  await DeleteWhatsAppService(whatsappId);
+  await DeleteWhatsAppService(whatsappId, tenantId);
   whatsappProvider.removeSession(+whatsappId);
 
   const io = getIO();

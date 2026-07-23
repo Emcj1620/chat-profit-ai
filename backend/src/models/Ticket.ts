@@ -1,6 +1,7 @@
 import {
   Table,
   Column,
+  DataType,
   CreatedAt,
   UpdatedAt,
   Model,
@@ -17,6 +18,9 @@ import Message from "./Message";
 import Queue from "./Queue";
 import User from "./User";
 import Whatsapp from "./Whatsapp";
+import Tenant from "./Tenant";
+import KanbanStage from "./KanbanStage";
+import ChatFlow from "./ChatFlow";
 
 @Table
 class Ticket extends Model<Ticket> {
@@ -24,6 +28,29 @@ class Ticket extends Model<Ticket> {
   @AutoIncrement
   @Column
   id: number;
+
+  @ForeignKey(() => Tenant)
+  @Column
+  tenantId: number;
+
+  @BelongsTo(() => Tenant)
+  tenant: Tenant;
+
+  @ForeignKey(() => ChatFlow)
+  @Column
+  flowId: number;
+
+  @BelongsTo(() => ChatFlow)
+  flow: ChatFlow;
+
+  @Column
+  flowNodeId: string;
+
+  @Column(DataType.TEXT)
+  flowState: string;
+
+  @Column
+  timerDelayUntil: Date;
 
   @Column({ defaultValue: "pending" })
   status: string;
@@ -71,6 +98,13 @@ class Ticket extends Model<Ticket> {
 
   @BelongsTo(() => Queue)
   queue: Queue;
+
+  @ForeignKey(() => KanbanStage)
+  @Column
+  kanbanStageId: number;
+
+  @BelongsTo(() => KanbanStage)
+  kanbanStage: KanbanStage;
 
   @HasMany(() => Message)
   messages: Message[];

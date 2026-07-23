@@ -74,16 +74,20 @@ const mapMessageAck = (wbotAck: any): MessageAck => {
 const convertToProviderMessage = (
   wbotMessage: WbotMessage
 ): ProviderMessage => {
+  if (!wbotMessage) {
+    throw new Error("wbotMessage is null or undefined");
+  }
+  const messageId = wbotMessage.id?.id || `fallback_${Date.now()}`;
   return {
-    id: wbotMessage.id.id,
-    body: wbotMessage.body,
-    fromMe: wbotMessage.fromMe,
-    hasMedia: wbotMessage.hasMedia,
+    id: messageId,
+    body: wbotMessage.body || "",
+    fromMe: wbotMessage.fromMe || false,
+    hasMedia: wbotMessage.hasMedia || false,
     type: mapMessageType(wbotMessage.type),
-    timestamp: wbotMessage.timestamp,
-    from: wbotMessage.from,
-    to: wbotMessage.to,
-    hasQuotedMsg: wbotMessage.hasQuotedMsg,
+    timestamp: wbotMessage.timestamp || Math.floor(Date.now() / 1000),
+    from: wbotMessage.from || "",
+    to: wbotMessage.to || "",
+    hasQuotedMsg: wbotMessage.hasQuotedMsg || false,
     ack: mapMessageAck(wbotMessage.ack)
   };
 };
@@ -333,6 +337,21 @@ const sendMessage = async (
     linkPreview: options?.linkPreview
   });
 
+  if (!sentMessage) {
+    return {
+      id: `fallback_${Date.now()}`,
+      body: body,
+      fromMe: true,
+      hasMedia: false,
+      type: "chat",
+      timestamp: Math.floor(Date.now() / 1000),
+      from: "",
+      to: to,
+      hasQuotedMsg: false,
+      ack: 1
+    };
+  }
+
   return convertToProviderMessage(sentMessage);
 };
 
@@ -366,6 +385,22 @@ const sendMedia = async (
   }
 
   const sentMessage = await wbot.sendMessage(to, messageMedia, mediaOptions);
+
+  if (!sentMessage) {
+    return {
+      id: `fallback_${Date.now()}`,
+      body: options?.caption || media.filename || "",
+      fromMe: true,
+      hasMedia: true,
+      type: media.mimetype.startsWith("image/") ? "image" : "document",
+      timestamp: Math.floor(Date.now() / 1000),
+      from: "",
+      to: to,
+      hasQuotedMsg: false,
+      ack: 1
+    };
+  }
+
   return convertToProviderMessage(sentMessage);
 };
 
@@ -451,8 +486,13 @@ const init = async (whatsapp: Whatsapp): Promise<void> => {
     const args: string = process.env.CHROME_ARGS || "";
 
     const wbot: Session = new Client({
-      session: sessionCfg,
       authStrategy: new LocalAuth({ clientId: `bd_${whatsapp.id}` }),
+      webVersion: "2.3000.1015901620-alpha",
+      webVersionCache: {
+        type: "remote",
+        remotePath:
+          "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1015901620-alpha.html"
+      },
       puppeteer: {
         // headless: false, // TODO make sure chromium closes on session disconnection / delete
         executablePath: process.env.CHROME_BIN || undefined,
@@ -469,6 +509,7 @@ const init = async (whatsapp: Whatsapp): Promise<void> => {
         ]
       }
     });
+
 
     wbot.on("qr", async qr => {
       logger.info("Session:", sessionName);
@@ -621,6 +662,20 @@ const init = async (whatsapp: Whatsapp): Promise<void> => {
   }
 };
 
+const sendPresenceState = async (
+  sessionId: number,
+  chatId: string,
+  state: "typing" | "recording" | "clear"
+): Promise<void> => {
+  try {
+    const wbot = getWbot(sessionId) as any;
+    const mappedState = state === "clear" ? "paused" : state;
+    await wbot.sendPresenceState(chatId, mappedState as any);
+  } catch (err) {
+    logger.error(`Error sending presence state in wwebjs: ${err}`);
+  }
+};
+
 export const WhatsappWebJsProvider: WhatsappProvider = {
   init,
   removeSession,
@@ -632,5 +687,6 @@ export const WhatsappWebJsProvider: WhatsappProvider = {
   getProfilePicUrl,
   getContacts,
   sendSeen,
-  fetchChatMessages
+  fetchChatMessages,
+  sendPresenceState
 };

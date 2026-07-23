@@ -29,7 +29,7 @@ export default defineConfig({
   envPrefix: "VITE_",
   esbuild: {
     loader: "jsx",
-    include: /src\/.*\.[jt]sx?$/,
+    include: /.*\.[jt]sx?$/,
     exclude: [],
   },
   define: {
@@ -43,6 +43,11 @@ export default defineConfig({
       "@material-ui/lab",
     ],
     exclude: [],
+    esbuildOptions: {
+      loader: {
+        ".js": "jsx",
+      },
+    },
   },
   resolve: {
     alias: {

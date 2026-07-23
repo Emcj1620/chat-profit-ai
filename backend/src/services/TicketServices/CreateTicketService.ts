@@ -10,15 +10,17 @@ interface Request {
   status: string;
   userId: number;
   queueId?: number;
+  tenantId: number;
 }
 
 const CreateTicketService = async ({
   contactId,
   status,
   userId,
-  queueId
+  queueId,
+  tenantId
 }: Request): Promise<Ticket> => {
-  const defaultWhatsapp = await GetDefaultWhatsApp(userId);
+  const defaultWhatsapp = await GetDefaultWhatsApp(userId, tenantId);
 
   await CheckContactOpenTickets(contactId, defaultWhatsapp.id);
 
@@ -29,21 +31,23 @@ const CreateTicketService = async ({
     queueId = user?.queues.length === 1 ? user.queues[0].id : undefined;
   }
 
-  const { id }: Ticket = await defaultWhatsapp.$create("ticket", {
+  const ticket = await Ticket.create({
     contactId,
     status,
     isGroup,
     userId,
-    queueId
+    queueId,
+    whatsappId: defaultWhatsapp.id,
+    tenantId
   });
 
-  const ticket = await Ticket.findByPk(id, { include: ["contact"] });
+  const showTicket = await Ticket.findByPk(ticket.id, { include: ["contact"] });
 
-  if (!ticket) {
+  if (!showTicket) {
     throw new AppError("ERR_CREATING_TICKET");
   }
 
-  return ticket;
+  return showTicket;
 };
 
 export default CreateTicketService;

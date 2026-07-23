@@ -2,7 +2,7 @@ import AppError from "../errors/AppError";
 import Whatsapp from "../models/Whatsapp";
 import GetDefaultWhatsAppByUser from "./GetDefaultWhatsAppByUser";
 
-const GetDefaultWhatsApp = async (userId?: number): Promise<Whatsapp> => {
+const GetDefaultWhatsApp = async (userId?: number, tenantId?: number): Promise<Whatsapp> => {
   if (userId) {
     const whatsappByUser = await GetDefaultWhatsAppByUser(userId);
     if (whatsappByUser !== null) {
@@ -11,7 +11,7 @@ const GetDefaultWhatsApp = async (userId?: number): Promise<Whatsapp> => {
   }
 
   const defaultWhatsapp = await Whatsapp.findOne({
-    where: { isDefault: true }
+    where: { isDefault: true, ...(tenantId && { tenantId }) }
   });
 
   if (!defaultWhatsapp) {

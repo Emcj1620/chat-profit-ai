@@ -1,9 +1,9 @@
 import Setting from "../models/Setting";
 import AppError from "../errors/AppError";
 
-const CheckSettings = async (key: string): Promise<string> => {
+const CheckSettings = async (key: string, tenantId = 1): Promise<string> => {
   const setting = await Setting.findOne({
-    where: { key }
+    where: { key, tenantId }
   });
 
   if (!setting) {

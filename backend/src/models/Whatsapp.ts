@@ -11,11 +11,15 @@ import {
   AllowNull,
   HasMany,
   Unique,
+  ForeignKey,
+  BelongsTo,
   BelongsToMany
 } from "sequelize-typescript";
 import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
+import Tenant from "./Tenant";
+import ChatFlow from "./ChatFlow";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -23,6 +27,20 @@ class Whatsapp extends Model<Whatsapp> {
   @AutoIncrement
   @Column
   id: number;
+
+  @ForeignKey(() => Tenant)
+  @Column
+  tenantId: number;
+
+  @BelongsTo(() => Tenant)
+  tenant: Tenant;
+
+  @ForeignKey(() => ChatFlow)
+  @Column
+  flowId: number;
+
+  @BelongsTo(() => ChatFlow)
+  flow: ChatFlow;
 
   @AllowNull
   @Unique
@@ -57,6 +75,30 @@ class Whatsapp extends Model<Whatsapp> {
   @AllowNull
   @Column
   isDefault: boolean;
+
+  @Default(false)
+  @Column
+  gptEnabled: boolean;
+
+  @AllowNull
+  @Column(DataType.TEXT)
+  gptApiKey: string;
+
+  @Default("gpt-4o-mini")
+  @Column
+  gptModel: string;
+
+  @AllowNull
+  @Column(DataType.TEXT)
+  gptPrompt: string;
+
+  @AllowNull
+  @Column(DataType.TEXT)
+  gptGuidelines: string;
+
+  @Default(0.7)
+  @Column(DataType.FLOAT)
+  gptTemperature: number;
 
   @CreatedAt
   createdAt: Date;

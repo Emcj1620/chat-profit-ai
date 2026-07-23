@@ -29,7 +29,7 @@ const check = (role, action, data) => {
 };
 
 const Can = ({ role, perform, data, yes, no }) =>
-	check(role, perform, data) ? yes() : no();
+  check(role?.toLowerCase(), perform, data) ? yes() : no();
 
 Can.defaultProps = {
 	yes: () => null,

@@ -6,8 +6,11 @@ import {
   UpdatedAt,
   Model,
   PrimaryKey,
-  AutoIncrement
+  AutoIncrement,
+  ForeignKey,
+  BelongsTo
 } from "sequelize-typescript";
+import Tenant from "./Tenant";
 
 @Table
 class QuickAnswer extends Model<QuickAnswer> {
@@ -15,6 +18,13 @@ class QuickAnswer extends Model<QuickAnswer> {
   @AutoIncrement
   @Column
   id: number;
+
+  @ForeignKey(() => Tenant)
+  @Column
+  tenantId: number;
+
+  @BelongsTo(() => Tenant)
+  tenant: Tenant;
 
   @Column(DataType.TEXT)
   shortcut: string;

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import isAuth from "../middleware/isAuth";
+import checkSubscription from "../middleware/checkSubscription";
 import uploadConfig from "../config/upload";
 
 import * as MessageController from "../controllers/MessageController";
@@ -14,6 +15,7 @@ messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
 messageRoutes.post(
   "/messages/:ticketId",
   isAuth,
+  checkSubscription,
   upload.array("medias"),
   MessageController.store
 );
