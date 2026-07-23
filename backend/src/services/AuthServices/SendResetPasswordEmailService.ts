@@ -12,6 +12,17 @@ const SendResetPasswordEmailService = async (email: string): Promise<void> => {
     throw new AppError("E-mail não encontrado no sistema.", 404);
   }
 
+  try {
+    if (user.sequelize) {
+      await user.sequelize.query(`
+        ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "resetPasswordToken" VARCHAR(255);
+        ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "resetPasswordExpires" TIMESTAMP WITH TIME ZONE;
+      `);
+    }
+  } catch (e) {
+    // Ignora se já existir
+  }
+
   const token = crypto.randomBytes(32).toString("hex");
   const expires = new Date(Date.now() + 3600000); // 1 hora de validade
 
