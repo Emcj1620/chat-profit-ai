@@ -73,6 +73,12 @@ export const signupRateLimiter = createRateLimiter({
   message: "Muitas contas criadas recentemente a partir deste IP. Aguarde 1 hora."
 });
 
+export const refreshRateLimiter = createRateLimiter({
+  windowMs: 60 * 1000, // 1 minuto
+  max: 60, // Máximo 60 refreshes por minuto (1 por segundo) — normal para uso real
+  message: "Muitas solicitações de refresh de token. Por favor, aguarde."
+});
+
 export const globalApiRateLimiter = createRateLimiter({
   windowMs: 60 * 1000, // 1 minuto
   max: 200, // Máximo 200 requisições por minuto
