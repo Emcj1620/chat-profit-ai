@@ -2,21 +2,18 @@ import React, { useState, useContext } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import {
-  Avatar,
   Button,
   CssBaseline,
   TextField,
   Grid,
-  Box,
   Typography,
   Container,
   InputAdornment,
   IconButton,
   Link,
-  Paper
 } from '@material-ui/core';
 
-import { LockOutlined, Visibility, VisibilityOff } from '@material-ui/icons';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -25,19 +22,6 @@ import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { useThemeContext } from "../../context/DarkMode";
 import { getBackendUrl } from "../../config";
-
-// const Copyright = () => {
-// 	return (
-// 		<Typography variant="body2" color="textSecondary" align="center">
-// 			{"Copyleft "}
-// 			<Link color="inherit" href="https://github.com/canove">
-// 				Canove
-// 			</Link>{" "}
-// 			{new Date().getFullYear()}
-// 			{"."}
-// 		</Typography>
-// 	);
-// };
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -50,17 +34,19 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover",
     backgroundRepeat: "no-repeat",
   },
+  // Card escuro com glassmorphism — logo fica visível sobre o fundo escuro
   cardContainer: {
     padding: theme.spacing(4),
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    borderRadius: "16px",
-    boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.25)",
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+    borderRadius: "20px",
+    background: "rgba(10, 14, 26, 0.82)",
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    boxShadow: "0 8px 40px 0 rgba(0,0,0,0.55)",
+    width: "100%",
   },
   form: {
     width: "100%",
@@ -70,7 +56,33 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0, 2),
     borderRadius: "8px",
     padding: "10px 0",
-    fontWeight: "bold"
+    fontWeight: "bold",
+    background: "linear-gradient(90deg, #28C76F 0%, #0084FF 100%)",
+    color: "#fff",
+    "&:hover": {
+      background: "linear-gradient(90deg, #A8FF33 0%, #0084FF 100%)",
+    }
+  },
+  // Inputs com bordas claras para contraste no fundo escuro
+  inputRoot: {
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": { borderColor: "rgba(255,255,255,0.25)" },
+      "&:hover fieldset": { borderColor: "rgba(255,255,255,0.5)" },
+      "&.Mui-focused fieldset": { borderColor: "#28C76F" },
+    },
+    "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.6)" },
+    "& .MuiInputBase-input": { color: "#fff" },
+    "& .MuiIconButton-root": { color: "rgba(255,255,255,0.6)" },
+  },
+  linkText: {
+    color: "#A8FF33",
+    "&:hover": { color: "#28C76F" },
+  },
+  appTitle: {
+    color: "#fff",
+    fontWeight: 700,
+    marginBottom: "10px",
+    textShadow: "0 2px 8px rgba(0,0,0,0.5)",
   },
 }));
 
@@ -105,24 +117,27 @@ const Login = () => {
     <div className={classes.root} style={rootStyle}>
       <CssBaseline />
       <Container component="main" maxWidth="xs">
-        <Paper className={classes.cardContainer} elevation={6}>
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt={appName}
-              style={{ maxHeight: "70px", maxWidth: "260px", width: "auto", margin: "10px auto 20px auto", display: "block" }}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-          ) : (
-            <Avatar className={classes.avatar}>
-              <LockOutlined />
-            </Avatar>
-          )}
-          <Typography component="h1" variant="h5" style={{ fontWeight: 600, marginBottom: "10px" }}>
+        <div className={classes.cardContainer}>
+          {/* Logo sobre fundo escuro — visibilidade perfeita */}
+          <img
+            src={logoUrl}
+            alt={appName}
+            style={{
+              maxHeight: "80px",
+              maxWidth: "280px",
+              width: "auto",
+              margin: "0 auto 20px auto",
+              display: "block",
+              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))"
+            }}
+            onError={(e) => { e.target.src = "/logo.png"; }}
+          />
+          <Typography component="h1" variant="h5" className={classes.appTitle}>
             {appName}
           </Typography>
           <form className={classes.form} noValidate onSubmit={handlSubmit}>
             <TextField
+              className={classes.inputRoot}
               variant="outlined"
               margin="normal"
               required
@@ -136,6 +151,7 @@ const Login = () => {
               autoFocus
             />
             <TextField
+              className={classes.inputRoot}
               variant="outlined"
               margin="normal"
               required
@@ -164,7 +180,6 @@ const Login = () => {
               type="submit"
               fullWidth
               variant="contained"
-              color="primary"
               className={classes.submit}
             >
               {i18n.t("login.buttons.submit")}
@@ -176,6 +191,7 @@ const Login = () => {
                   variant="body2"
                   component={RouterLink}
                   to="/forget-password"
+                  className={classes.linkText}
                 >
                   Esqueci minha senha
                 </Link>
@@ -186,13 +202,14 @@ const Login = () => {
                   variant="body2"
                   component={RouterLink}
                   to="/signup"
+                  className={classes.linkText}
                 >
                   {i18n.t("login.buttons.register")}
                 </Link>
               </Grid>
             </Grid>
           </form>
-        </Paper>
+        </div>
       </Container>
     </div>
   );

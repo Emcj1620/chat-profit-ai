@@ -45,20 +45,28 @@ export const sendMail = async ({ to, subject, html }: SendMailData): Promise<voi
   };
 
   try {
+    // 1ª tentativa: domínio customizado zapprofit.com.br
     let result = await sendHttpRequest(customFrom);
+    console.log(`[SendMail] 1ª tentativa (${customFrom}) - Status: ${result.statusCode} - Response: ${result.data}`);
 
-    if (result.statusCode >= 400 && (result.data.includes("domain") || result.data.includes("verify") || result.data.includes("validation"))) {
-      console.warn("Retrying email sending with onboarding@resend.dev fallback...");
+    // Se falhar por qualquer motivo 4xx, tenta com o sender de onboarding do Resend
+    if (result.statusCode >= 400) {
+      console.warn(`[SendMail] Tentativa 1 falhou (${result.statusCode}). Tentando fallback onboarding@resend.dev...`);
       result = await sendHttpRequest(fallbackFrom);
+      console.log(`[SendMail] 2ª tentativa (fallback) - Status: ${result.statusCode} - Response: ${result.data}`);
     }
 
     if (result.statusCode >= 400) {
-      console.error("Resend API Error:", result.data);
-      throw new AppError("Não foi possível enviar o e-mail. Verifique se o endereço está correto.", 400);
+      console.error("[SendMail] Ambas as tentativas falharam:", result.data);
+      // Mensagem de erro mais útil baseada no código
+      if (result.statusCode === 401 || result.statusCode === 403) {
+        throw new AppError("Erro de autenticação com o serviço de e-mail. Contate o administrador.", 500);
+      }
+      throw new AppError("Não foi possível enviar o e-mail de recuperação. Tente novamente em alguns minutos.", 500);
     }
   } catch (err: any) {
     if (err instanceof AppError) throw err;
-    console.error("SendMail Exception:", err);
-    throw new AppError("Erro ao enviar e-mail de recuperação.", 500);
+    console.error("[SendMail] Exceção inesperada:", err);
+    throw new AppError("Erro interno ao enviar e-mail de recuperação.", 500);
   }
 };

@@ -38,8 +38,14 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    borderRadius: "16px",
-    boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.25)",
+    borderRadius: "20px",
+    background: "rgba(10, 14, 26, 0.82)",
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    boxShadow: "0 8px 40px 0 rgba(0,0,0,0.55)",
+    width: "100%",
+    color: "#fff",
   },
   avatar: {
     margin: theme.spacing(1),
@@ -54,6 +60,17 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "8px",
     padding: "10px 0",
     fontWeight: "bold",
+    background: "linear-gradient(90deg, #28C76F 0%, #0084FF 100%)",
+    color: "#fff",
+  },
+  inputRoot: {
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": { borderColor: "rgba(255,255,255,0.25)" },
+      "&:hover fieldset": { borderColor: "rgba(255,255,255,0.5)" },
+      "&.Mui-focused fieldset": { borderColor: "#28C76F" },
+    },
+    "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.6)" },
+    "& .MuiInputBase-input": { color: "#fff" },
   },
 }));
 
@@ -95,14 +112,14 @@ const ForgetPassword = () => {
     <div className={classes.root} style={rootStyle}>
       <CssBaseline />
       <Container component="main" maxWidth="xs">
-        <Paper className={classes.cardContainer} elevation={6}>
+        <div className={classes.cardContainer}>
           <img
             src={logoUrl}
             alt={appName}
-            style={{ maxHeight: "70px", maxWidth: "260px", width: "auto", margin: "10px auto 20px auto", display: "block" }}
+            style={{ maxHeight: "80px", maxWidth: "280px", width: "auto", margin: "0 auto 20px auto", display: "block", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))" }}
             onError={(e) => { e.target.src = "/logo.png"; }}
           />
-          <Typography component="h1" variant="h5" style={{ fontWeight: 600, marginBottom: "10px" }}>
+          <Typography component="h1" variant="h5" style={{ fontWeight: 700, marginBottom: "10px", color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
             Recuperar Senha
           </Typography>
 
@@ -127,6 +144,7 @@ const ForgetPassword = () => {
           ) : (
             <form className={classes.form} noValidate onSubmit={handleSubmit}>
               <TextField
+              className={classes.inputRoot}
                 variant="outlined"
                 margin="normal"
                 required
@@ -158,7 +176,7 @@ const ForgetPassword = () => {
               </Grid>
             </form>
           )}
-        </Paper>
+        </div>
       </Container>
     </div>
   );
