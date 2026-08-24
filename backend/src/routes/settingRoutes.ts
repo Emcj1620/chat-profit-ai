@@ -29,7 +29,7 @@ settingRoutes.get("/settings/test-db", async (req, res) => {
       return res.status(500).json({ error: "Sequelize connection not found on User model" });
     }
 
-    const users = await sequelize.query("SELECT id, name, email, tenantId, userType FROM Users", { type: QueryTypes.SELECT });
+    const users = await sequelize.query("SELECT id, name, email, tenantId, profile FROM Users", { type: QueryTypes.SELECT });
     const tenants = await sequelize.query("SELECT id, name, status, dueDate FROM Tenants", { type: QueryTypes.SELECT });
     const migrations = await sequelize.query("SELECT name FROM SequelizeMeta", { type: QueryTypes.SELECT });
 
