@@ -30,7 +30,7 @@ settingRoutes.get("/settings/test-db", async (req, res) => {
     }
 
     const users = await sequelize.query("SELECT id, name, email, tenantId, profile FROM Users", { type: QueryTypes.SELECT });
-    const tenants = await sequelize.query("SELECT id, name, status, dueDate FROM Tenants", { type: QueryTypes.SELECT });
+    const tenants = await sequelize.query("SELECT id, name, subscriptionStatus, dueDate FROM Tenants", { type: QueryTypes.SELECT });
     const migrations = await sequelize.query("SELECT name FROM SequelizeMeta", { type: QueryTypes.SELECT });
 
     return res.json({
