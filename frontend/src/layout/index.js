@@ -152,8 +152,10 @@ const LoggedInLayout = ({ children }) => {
         const { data } = await api.get("/subscription");
         const isExpired = data.dueDate && new Date(data.dueDate) < new Date();
         const isSuspended = data.subscriptionStatus === "suspended";
-        // Bloqueia se a assinatura estiver suspensa ou vencida/expirada
-        if (isSuspended || isExpired) {
+        // Bloqueia se a assinatura estiver suspensa ou vencida/expirada (exceto para o Tenant 1, que é o administrador master)
+        if (data.id === 1) {
+          setSubscriptionBlocked(false);
+        } else if (isSuspended || isExpired) {
           setSubscriptionBlocked(true);
         } else {
           setSubscriptionBlocked(false);
