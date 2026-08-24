@@ -1597,6 +1597,44 @@ const sendPresenceState = async (
   }
 };
 
+const updateChatLabels = async (
+  sessionId: number,
+  chatId: string,
+  labelNames: string[]
+): Promise<void> => {
+  try {
+    const wbot = getWbot(sessionId);
+    const normalizedChatId = normalizeJid(chatId);
+
+    const anyWbot = wbot as any;
+    if (!anyWbot.store || !anyWbot.store.labels) return;
+
+    const labels = Object.values(anyWbot.store.labels) as any[];
+
+    const targetLabelIds = labelNames
+      .map(name => {
+        const match = labels.find(l => l.name?.toLowerCase() === name.toLowerCase());
+        return match ? match.id : null;
+      })
+      .filter(Boolean) as string[];
+
+    if (typeof wbot.addChatLabel === "function" && typeof wbot.removeChatLabel === "function") {
+      for (const label of labels) {
+        const labelId = label.id;
+        const shouldHave = targetLabelIds.includes(labelId);
+
+        if (shouldHave) {
+          await wbot.addChatLabel(normalizedChatId, labelId).catch(() => {});
+        } else {
+          await wbot.removeChatLabel(normalizedChatId, labelId).catch(() => {});
+        }
+      }
+    }
+  } catch (err: any) {
+    logger.error(`Error updating chat labels on whaileys: ${err.message}`);
+  }
+};
+
 export const WhaileysProvider: WhatsappProvider = {
   init,
   removeSession,
@@ -1609,5 +1647,6 @@ export const WhaileysProvider: WhatsappProvider = {
   getContacts,
   sendSeen,
   fetchChatMessages,
-  sendPresenceState
+  sendPresenceState,
+  updateChatLabels
 };

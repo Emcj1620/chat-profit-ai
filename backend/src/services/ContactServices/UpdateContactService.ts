@@ -11,6 +11,7 @@ interface ContactData {
   email?: string;
   number?: string;
   name?: string;
+  tags?: string;
   extraInfo?: ExtraInfo[];
 }
 
@@ -23,11 +24,11 @@ const UpdateContactService = async ({
   contactData,
   contactId
 }: Request): Promise<Contact> => {
-  const { email, name, number, extraInfo } = contactData;
+  const { email, name, number, tags, extraInfo } = contactData;
 
   const contact = await Contact.findOne({
     where: { id: contactId },
-    attributes: ["id", "name", "number", "email", "profilePicUrl"],
+    attributes: ["id", "name", "number", "email", "profilePicUrl", "tags", "tenantId"],
     include: ["extraInfo"]
   });
 
@@ -56,11 +57,32 @@ const UpdateContactService = async ({
   await contact.update({
     name,
     number,
-    email
+    email,
+    tags
   });
 
+  // Sincronizar etiquetas com o celular do WhatsApp
+  if (tags !== undefined) {
+    try {
+      const Whatsapp = require("../../models/Whatsapp").default;
+      const whatsapps = await Whatsapp.findAll({
+        where: { tenantId: contact.tenantId, status: "CONNECTED" }
+      });
+      const { whatsappProvider } = require("../../providers/WhatsApp");
+      const tagNames = tags ? tags.split(",").map((t: string) => t.trim()) : [];
+      
+      for (const w of whatsapps) {
+        if (typeof whatsappProvider.updateChatLabels === "function") {
+          await whatsappProvider.updateChatLabels(w.id, contact.number, tagNames).catch(() => {});
+        }
+      }
+    } catch (err: any) {
+      console.error("Error triggering label sync from panel:", err.message);
+    }
+  }
+
   await contact.reload({
-    attributes: ["id", "name", "number", "email", "profilePicUrl"],
+    attributes: ["id", "name", "number", "email", "profilePicUrl", "tags", "tenantId"],
     include: ["extraInfo"]
   });
 

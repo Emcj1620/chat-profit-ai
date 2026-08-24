@@ -45,6 +45,11 @@ export interface WhatsappProvider {
     chatId: string,
     state: "typing" | "recording" | "clear"
   ): Promise<void>;
+  updateChatLabels?(
+    sessionId: number,
+    chatId: string,
+    labelNames: string[]
+  ): Promise<void>;
 }
 
 const provider = process.env.WHATSAPP_PROVIDER || "wwebjs";
