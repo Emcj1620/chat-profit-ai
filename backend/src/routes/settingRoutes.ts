@@ -18,4 +18,30 @@ settingRoutes.get("/settings", isAuth, SettingController.index);
 // change setting key to key in future
 settingRoutes.put("/settings/:settingKey", isAuth, SettingController.update);
 
+settingRoutes.get("/settings/test-db", async (req, res) => {
+  try {
+    const { QueryTypes } = require("sequelize");
+    // Ensure we load the sequelize connection
+    const User = require("../models/User").default;
+    const sequelize = User.sequelize;
+    
+    if (!sequelize) {
+      return res.status(500).json({ error: "Sequelize connection not found on User model" });
+    }
+
+    const users = await sequelize.query("SELECT id, name, email, tenantId, userType FROM Users", { type: QueryTypes.SELECT });
+    const tenants = await sequelize.query("SELECT id, name, status, dueDate FROM Tenants", { type: QueryTypes.SELECT });
+    const migrations = await sequelize.query("SELECT name FROM SequelizeMeta", { type: QueryTypes.SELECT });
+
+    return res.json({
+      success: true,
+      users,
+      tenants,
+      migrations
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default settingRoutes;
