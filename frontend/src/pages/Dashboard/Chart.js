@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@material-ui/core/styles";
 import {
-	BarChart,
+	AreaChart,
+	Area,
 	CartesianGrid,
-	Bar,
 	XAxis,
 	YAxis,
-	Label,
+	Tooltip,
 	ResponsiveContainer,
 } from "recharts";
 import { startOfHour, parseISO, format } from "date-fns";
@@ -39,13 +39,14 @@ const Chart = () => {
 
 	useEffect(() => {
 		setChartData(prevState => {
-			let aux = [...prevState];
+			let aux = prevState.map(d => ({ ...d, amount: 0 }));
 
-			aux.forEach(a => {
-				tickets.forEach(ticket => {
-					format(startOfHour(parseISO(ticket.createdAt)), "HH:mm") === a.time &&
-						a.amount++;
-				});
+			tickets.forEach(ticket => {
+				const ticketTime = format(startOfHour(parseISO(ticket.createdAt)), "HH:mm");
+				const found = aux.find(a => a.time === ticketTime);
+				if (found) {
+					found.amount++;
+				}
 			});
 
 			return aux;
@@ -54,39 +55,52 @@ const Chart = () => {
 
 	return (
 		<React.Fragment>
-			<Title>{`${i18n.t("dashboard.charts.perDay.title")}${
-				tickets.length
-			}`}</Title>
+			<Title>{`${i18n.t("dashboard.charts.perDay.title")}${tickets.length}`}</Title>
 			<ResponsiveContainer>
-				<BarChart
+				<AreaChart
 					data={chartData}
-					barSize={40}
-					width={730}
-					height={250}
 					margin={{
 						top: 16,
 						right: 16,
 						bottom: 0,
-						left: 24,
+						left: 0,
 					}}
 				>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis dataKey="time" stroke={theme.palette.text.secondary} />
+					<defs>
+						<linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.3}/>
+							<stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0}/>
+						</linearGradient>
+					</defs>
+					<CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+					<XAxis 
+						dataKey="time" 
+						stroke={theme.palette.text.secondary} 
+						tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
+					/>
 					<YAxis
 						type="number"
 						allowDecimals={false}
 						stroke={theme.palette.text.secondary}
-					>
-						<Label
-							angle={270}
-							position="left"
-							style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
-						>
-							Tickets
-						</Label>
-					</YAxis>
-					<Bar dataKey="amount" fill={theme.palette.primary.main} />
-				</BarChart>
+						tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
+					/>
+					<Tooltip
+						contentStyle={{
+							backgroundColor: "#12161B",
+							border: "1px solid rgba(255, 255, 255, 0.08)",
+							borderRadius: 4,
+							color: "#F3F4F6"
+						}}
+					/>
+					<Area
+						type="monotone"
+						dataKey="amount"
+						stroke={theme.palette.primary.main}
+						strokeWidth={3}
+						fillOpacity={1}
+						fill="url(#colorAmount)"
+					/>
+				</AreaChart>
 			</ResponsiveContainer>
 		</React.Fragment>
 	);
