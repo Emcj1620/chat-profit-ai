@@ -61,13 +61,13 @@ const CreateUserService = async ({
 
   if (!actualTenantId) {
     // Public signup: create a new tenant
-    const sevenDaysFromNow = new Date();
-    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
 
     const tenant = await Tenant.create({
       name: `${name}'s Company`,
       subscriptionStatus: "trialing",
-      dueDate: sevenDaysFromNow,
+      dueDate: threeDaysFromNow,
       maxUsers: 3,
       maxConnections: 1,
       planId: 1

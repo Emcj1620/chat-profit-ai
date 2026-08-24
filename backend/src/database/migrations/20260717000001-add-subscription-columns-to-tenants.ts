@@ -9,13 +9,13 @@ module.exports = {
       defaultValue: "trialing"
     });
 
-    // 2. Add dueDate column (default to 7 days from now)
-    const sevenDaysFromNow = new Date();
-    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    // 2. Add dueDate column (default to 3 days from now)
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
     await queryInterface.addColumn("Tenants", "dueDate", {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: sevenDaysFromNow
+      defaultValue: threeDaysFromNow
     });
 
     // 3. Add maxUsers column (default 3)

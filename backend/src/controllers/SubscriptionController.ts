@@ -10,7 +10,7 @@ import { getIO } from "../libs/socket";
 
 // Helper for Asaas Requests
 const asaasRequest = (
-  method: "GET" | "POST",
+  method: "GET" | "POST" | "PUT",
   path: string,
   token: string,
   data?: any
@@ -18,7 +18,7 @@ const asaasRequest = (
   return new Promise((resolve, reject) => {
     // Determinar se estamos em produção com base no formato do token
     const isProd = token.startsWith("$aact_prod_");
-    const host = isProd ? "api.asaas.com" : "sandbox.asaas.com";
+    const host = isProd ? "api.asaas.com" : "api-sandbox.asaas.com";
     
     const options = {
       hostname: host,
@@ -111,7 +111,11 @@ export const createPayment = async (req: Request, res: Response): Promise<Respon
   }
 
   // Obter credenciais globais do Asaas no Master Tenant (Tenant 1)
-  const asaasToken = await CheckSettings("asaasToken", 1).catch(() => "");
+  let asaasToken = await CheckSettings("asaasToken", 1).catch(() => "");
+  
+  if (!asaasToken || asaasToken === "enabled") {
+    asaasToken = process.env.ASAAS_TOKEN || "";
+  }
   
   if (!asaasToken) {
     throw new AppError("ERR_ASAAS_GATEWAY_NOT_CONFIGURED", 400);
@@ -121,6 +125,18 @@ export const createPayment = async (req: Request, res: Response): Promise<Respon
     throw new AppError("ERR_CPF_CNPJ_REQUIRED", 400);
   }
 
+  const cleanCpfCnpj = billingInfo.cpfCnpj.replace(/\D/g, "");
+  const cleanPhone = billingInfo.phone ? billingInfo.phone.replace(/\D/g, "") : "";
+  const cleanPostalCode = billingInfo.postalCode ? billingInfo.postalCode.replace(/\D/g, "") : "01001000";
+  const cleanCardNumber = (creditCard && creditCard.number) ? creditCard.number.replace(/\D/g, "") : "";
+
+  let remoteIp = (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || req.ip || "127.0.0.1";
+  if (remoteIp === "::1" || remoteIp === "::ffff:127.0.0.1") {
+    remoteIp = "127.0.0.1";
+  } else if (remoteIp.includes(",")) {
+    remoteIp = remoteIp.split(",")[0].trim();
+  }
+
   try {
     // 1. Obter ou Criar/Atualizar Cliente no Asaas
     let asaasCustomerId = tenant.asaasCustomerId;
@@ -128,19 +144,19 @@ export const createPayment = async (req: Request, res: Response): Promise<Respon
       const customer = await asaasRequest("POST", "/customers", asaasToken, {
         name: billingInfo.name,
         email: billingInfo.email,
-        cpfCnpj: billingInfo.cpfCnpj,
-        mobilePhone: billingInfo.phone,
+        cpfCnpj: cleanCpfCnpj,
+        mobilePhone: cleanPhone,
         notificationDisabled: true
       });
       asaasCustomerId = customer.id;
       await tenant.update({ asaasCustomerId });
     } else {
-      // Atualizar dados para certificar que o CPF/CNPJ e Telefone estejam corretos
-      await asaasRequest("POST", `/customers/${asaasCustomerId}`, asaasToken, {
+      // Atualizar dados para certificar que o CPF/CNPJ e Telefone estejam corretos (utilizando PUT)
+      await asaasRequest("PUT", `/customers/${asaasCustomerId}`, asaasToken, {
         name: billingInfo.name,
         email: billingInfo.email,
-        cpfCnpj: billingInfo.cpfCnpj,
-        mobilePhone: billingInfo.phone
+        cpfCnpj: cleanCpfCnpj,
+        mobilePhone: cleanPhone
       }).catch(err => console.error("Error updating customer in Asaas:", err));
     }
 
@@ -159,6 +175,7 @@ export const createPayment = async (req: Request, res: Response): Promise<Respon
 
     if (paymentMethod === "credit_card") {
       payload.billingType = "CREDIT_CARD";
+      payload.remoteIp = remoteIp;
       
       if (installmentCount && installmentCount > 1) {
         payload.installmentCount = installmentCount;
@@ -170,7 +187,7 @@ export const createPayment = async (req: Request, res: Response): Promise<Respon
       // Adicionar dados do cartão e informações do titular exigidas pelo Asaas
       payload.creditCard = {
         holderName: creditCard.holderName,
-        number: creditCard.number,
+        number: cleanCardNumber,
         expiryMonth: creditCard.expiryMonth,
         expiryYear: creditCard.expiryYear,
         ccv: creditCard.ccv
@@ -179,10 +196,10 @@ export const createPayment = async (req: Request, res: Response): Promise<Respon
       payload.creditCardHolderInfo = {
         name: billingInfo.name,
         email: billingInfo.email,
-        cpfCnpj: billingInfo.cpfCnpj,
-        postalCode: billingInfo.postalCode || "01001000",
+        cpfCnpj: cleanCpfCnpj,
+        postalCode: cleanPostalCode,
         addressNumber: billingInfo.addressNumber || "123",
-        phone: billingInfo.phone
+        phone: cleanPhone
       };
     } else {
       payload.billingType = "PIX";
