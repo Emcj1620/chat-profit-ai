@@ -204,6 +204,41 @@ const Settings = () => {
 				</Paper>
 
 				<Paper className={classes.paper}>
+					<Typography variant="subtitle1" style={{ fontWeight: 600, marginBottom: 15 }}>
+						Configuração de Pagamento (SaaS Asaas)
+					</Typography>
+					<Grid container spacing={2}>
+						<Grid item xs={12}>
+							<TextField
+								id="asaasToken-setting"
+								label="Token de Acesso do Asaas (Sandbox ou Produção)"
+								margin="dense"
+								variant="outlined"
+								name="asaasToken"
+								fullWidth
+								type="password"
+								value={getSettingValue("asaasToken")}
+								onChange={e => {
+									const val = e.target.value;
+									setSettings(prev => {
+										if (!Array.isArray(prev)) return [];
+										const idx = prev.findIndex(s => s.key === "asaasToken");
+										if (idx !== -1) {
+											const updated = [...prev];
+											updated[idx] = { ...updated[idx], value: val };
+											return updated;
+										} else {
+											return [...prev, { key: "asaasToken", value: val }];
+										}
+									});
+								}}
+								onBlur={handleChangeSetting}
+							/>
+						</Grid>
+					</Grid>
+				</Paper>
+
+				<Paper className={classes.paper}>
 					<Typography variant="subtitle1" style={{ fontWeight: 600, marginBottom: 10 }}>
 						Paleta de Cores Oficial Chat Profit AI
 					</Typography>
