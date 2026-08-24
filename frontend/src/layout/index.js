@@ -351,8 +351,17 @@ const LoggedInLayout = ({ children }) => {
                 color="primary" 
                 size="large"
                 onClick={() => history.push("/subscription")}
+                style={{ marginRight: 16 }}
               >
                 Ir para Tela de Assinatura
+              </Button>
+              <Button 
+                variant="outlined" 
+                color="secondary" 
+                size="large"
+                onClick={handleClickLogout}
+              >
+                Sair / Desconectar
               </Button>
             </Paper>
           </Container>
