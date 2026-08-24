@@ -10,7 +10,8 @@ import {
   BelongsTo,
   HasMany,
   AutoIncrement,
-  Default
+  Default,
+  AllowNull
 } from "sequelize-typescript";
 
 import Contact from "./Contact";
@@ -105,6 +106,10 @@ class Ticket extends Model<Ticket> {
 
   @BelongsTo(() => KanbanStage)
   kanbanStage: KanbanStage;
+
+  @AllowNull
+  @Column
+  typebotSessionId: string;
 
   @HasMany(() => Message)
   messages: Message[];

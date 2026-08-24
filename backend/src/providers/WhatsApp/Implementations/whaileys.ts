@@ -984,6 +984,67 @@ const init = async (whatsapp: Whatsapp): Promise<void> => {
 
   sessions.set(sessionId, wbot);
 
+  wbot.ev.on("labels.association", async ({ association, type }) => {
+    try {
+      const jid = association.chatId;
+      const labelId = association.labelId;
+      if (!jid || !labelId) return;
+
+      const number = jid.split("@")[0];
+
+      const Contact = require("../../../models/Contact").default;
+      const contact = await Contact.findOne({
+        where: { number, tenantId: whatsapp.tenantId }
+      });
+
+      if (!contact) return;
+
+      let labelName = `Label_${labelId}`;
+      const anyWbot = wbot as any;
+      if (anyWbot.store && anyWbot.store.labels) {
+        const storeLabel = anyWbot.store.labels[labelId];
+        if (storeLabel && storeLabel.name) {
+          labelName = storeLabel.name;
+        }
+      }
+
+      const currentTags = contact.tags ? contact.tags.split(",").map((t: string) => t.trim()) : [];
+      let updatedTags = [...currentTags];
+
+      if (type === "add") {
+        if (!updatedTags.includes(labelName)) {
+          updatedTags.push(labelName);
+        }
+      } else {
+        updatedTags = updatedTags.filter((t: string) => t !== labelName);
+      }
+
+      const newTagsStr = updatedTags.filter(Boolean).join(",");
+      await contact.update({ tags: newTagsStr });
+
+      io.emit("contact", {
+        action: "update",
+        contact
+      });
+    } catch (err: any) {
+      logger.error(`Error handling labels.association: ${err.message}`);
+    }
+  });
+
+  wbot.ev.on("labels.edit", async (label) => {
+    try {
+      const anyWbot = wbot as any;
+      if (anyWbot.store) {
+        if (!anyWbot.store.labels) {
+          anyWbot.store.labels = {};
+        }
+        anyWbot.store.labels[label.id] = label;
+      }
+    } catch (err: any) {
+      logger.error(`Error handling labels.edit: ${err.message}`);
+    }
+  });
+
   wbot.ev.on("creds.update", () => {
     debouncedSaveCreds(whatsapp, state.creds);
   });

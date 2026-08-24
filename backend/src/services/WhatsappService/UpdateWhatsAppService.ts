@@ -21,6 +21,12 @@ interface WhatsappData {
   gptGuidelines?: string;
   gptTemperature?: number;
   flowId?: number;
+  typebotEnabled?: boolean;
+  typebotUrl?: string;
+  typebotName?: string;
+  typebotViewerId?: string;
+  n8nEnabled?: boolean;
+  n8nUrl?: string;
 }
 
 interface Request {
@@ -59,7 +65,13 @@ const UpdateWhatsAppService = async ({
     gptPrompt,
     gptGuidelines,
     gptTemperature,
-    flowId
+    flowId,
+    typebotEnabled,
+    typebotUrl,
+    typebotName,
+    typebotViewerId,
+    n8nEnabled,
+    n8nUrl
   } = whatsappData;
 
   try {
@@ -102,7 +114,13 @@ const UpdateWhatsAppService = async ({
     gptPrompt,
     gptGuidelines,
     gptTemperature,
-    flowId
+    flowId,
+    typebotEnabled,
+    typebotUrl,
+    typebotName,
+    typebotViewerId,
+    n8nEnabled,
+    n8nUrl
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);

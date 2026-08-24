@@ -20,6 +20,12 @@ interface Request {
   gptGuidelines?: string;
   gptTemperature?: number;
   flowId?: number;
+  typebotEnabled?: boolean;
+  typebotUrl?: string;
+  typebotName?: string;
+  typebotViewerId?: string;
+  n8nEnabled?: boolean;
+  n8nUrl?: string;
 }
 
 interface Response {
@@ -41,7 +47,13 @@ const CreateWhatsAppService = async ({
   gptPrompt,
   gptGuidelines,
   gptTemperature = 0.7,
-  flowId
+  flowId,
+  typebotEnabled = false,
+  typebotUrl,
+  typebotName,
+  typebotViewerId,
+  n8nEnabled = false,
+  n8nUrl
 }: Request): Promise<Response> => {
   if (tenantId) {
     const tenant = await Tenant.findByPk(tenantId);
@@ -113,7 +125,13 @@ const CreateWhatsAppService = async ({
       gptPrompt,
       gptGuidelines,
       gptTemperature,
-      flowId
+      flowId,
+      typebotEnabled,
+      typebotUrl,
+      typebotName,
+      typebotViewerId,
+      n8nEnabled,
+      n8nUrl
     },
     { include: ["queues"] }
   );

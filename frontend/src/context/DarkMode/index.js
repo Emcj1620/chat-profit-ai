@@ -114,9 +114,36 @@ export const ThemeProvider = ({ children }) => {
           primary: { main: primaryColor },
           secondary: { main: secondaryColor },
           background: {
-            default: darkMode ? (darkModeBgColor || "#121212") : "#f5f5f5",
-            paper: darkMode ? (darkModeBgColor ? `${darkModeBgColor}` : "#1e1e1e") : "#ffffff",
+            default: darkMode ? (darkModeBgColor || "#0A0D10") : "#f5f5f5",
+            paper: darkMode ? (darkModeBgColor ? `${darkModeBgColor}` : "#12161B") : "#ffffff",
+          },
+          text: {
+            primary: darkMode ? "#F3F4F6" : "#333333",
+            secondary: darkMode ? "#9CA3AF" : "#666666",
           }
+        },
+        shape: {
+          borderRadius: 4
+        },
+        overrides: {
+          MuiCssBaseline: {
+            "@global": {
+              body: {
+                backgroundColor: darkMode ? (darkModeBgColor || "#0A0D10") : "#f5f5f5",
+              },
+            },
+          },
+          MuiPaper: {
+            outlined: {
+              borderColor: darkMode ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.12)",
+            },
+          },
+          MuiButton: {
+            root: {
+              textTransform: "none",
+              fontWeight: 500,
+            },
+          },
         },
       }),
     [darkMode, primaryColor, secondaryColor, darkModeBgColor]

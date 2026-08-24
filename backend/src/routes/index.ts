@@ -16,6 +16,7 @@ import kanbanRoutes from "./kanbanRoutes";
 import campaignRoutes from "./campaignRoutes";
 import chatFlowRoutes from "./chatFlowRoutes";
 import publicRoutes from "./publicRoutes";
+import webhookRoutes from "./webhookRoutes";
 
 const routes = Router();
 
@@ -34,6 +35,7 @@ routes.use(kanbanRoutes);
 routes.use(campaignRoutes);
 routes.use(chatFlowRoutes);
 routes.use(publicRoutes);
+routes.use(webhookRoutes);
 routes.use("/api/messages", apiRoutes);
 
 export default routes;

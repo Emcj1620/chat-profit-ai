@@ -52,6 +52,27 @@ const CreateMessageService = async ({
     throw new Error("ERR_CREATING_MESSAGE");
   }
 
+  // Trigger Webhook async para mensagens recebidas
+  if (!message.fromMe) {
+    const tenantId = message.ticket.tenantId;
+    import("../WebhookServices/DispatchWebhook")
+      .then(({ DispatchWebhook }) => {
+        DispatchWebhook(tenantId, "message_received", {
+          messageId: message.id,
+          body: message.body,
+          mediaType: message.mediaType,
+          mediaUrl: message.mediaUrl,
+          contact: {
+            id: message.contact?.id,
+            name: message.contact?.name,
+            number: message.contact?.number
+          },
+          ticketId: message.ticketId
+        });
+      })
+      .catch((err) => console.error("Error triggering webhook async:", err.message));
+  }
+
   const io = getIO();
   io.to(message.ticketId.toString())
     .to(message.ticket.status)

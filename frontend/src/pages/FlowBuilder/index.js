@@ -13,7 +13,8 @@ import {
   FormControl,
   InputLabel,
   Divider,
-  Grid
+  Grid,
+  Tooltip
 } from "@material-ui/core";
 import {
   ArrowBack as BackIcon,
@@ -677,30 +678,58 @@ const FlowBuilder = () => {
           <Typography variant="subtitle1" style={{ fontWeight: "bold", marginBottom: "8px" }}>
             Blocos do Robô
           </Typography>
-          <div className={classes.sidebarItem} onClick={() => addNode("message")}>
-            <MsgIcon style={{ color: "#1976D2" }} />
-            <Typography variant="body2">Enviar Mensagem</Typography>
-          </div>
-          <div className={classes.sidebarItem} onClick={() => addNode("input")}>
-            <InputIcon style={{ color: "#7B1FA2" }} />
-            <Typography variant="body2">Esperar Resposta</Typography>
-          </div>
-          <div className={classes.sidebarItem} onClick={() => addNode("condition")}>
-            <ConditionIcon style={{ color: "#E65100" }} />
-            <Typography variant="body2">Condicional</Typography>
-          </div>
-          <div className={classes.sidebarItem} onClick={() => addNode("action")}>
-            <ActionIcon style={{ color: "#388E3C" }} />
-            <Typography variant="body2">Ação Automatizada</Typography>
-          </div>
-          <div className={classes.sidebarItem} onClick={() => addNode("timer")}>
-            <TimerIcon style={{ color: "#FF8F00" }} />
-            <Typography variant="body2">Temporizador</Typography>
-          </div>
-          <div className={classes.sidebarItem} onClick={() => addNode("api_request")}>
-            <ApiIcon style={{ color: "#3F51B5" }} />
-            <Typography variant="body2">Integração API</Typography>
-          </div>
+          
+          <Tooltip title="Envia uma mensagem de texto ou mídia para o contato. Suporta simulação de digitação e variáveis como {nome}." placement="right" arrow>
+            <div className={classes.sidebarItem} onClick={() => addNode("message")}>
+              <MsgIcon style={{ color: "#1976D2" }} />
+              <Typography variant="body2">Enviar Mensagem</Typography>
+            </div>
+          </Tooltip>
+
+          <Tooltip title="Pausa o fluxo e aguarda a resposta do usuário, salvando o valor em uma variável personalizada." placement="right" arrow>
+            <div className={classes.sidebarItem} onClick={() => addNode("input")}>
+              <InputIcon style={{ color: "#7B1FA2" }} />
+              <Typography variant="body2">Esperar Resposta</Typography>
+            </div>
+          </Tooltip>
+
+          <Tooltip title="Desvia o caminho do robô dependendo do valor de uma variável (Ex: se a resposta é igual a 'Sim')." placement="right" arrow>
+            <div className={classes.sidebarItem} onClick={() => addNode("condition")}>
+              <ConditionIcon style={{ color: "#E65100" }} />
+              <Typography variant="body2">Condicional</Typography>
+            </div>
+          </Tooltip>
+
+          <Tooltip title="Executa uma ação do sistema em segundo plano, como adicionar tags, mover no Kanban ou transferir/encerrar." placement="right" arrow>
+            <div className={classes.sidebarItem} onClick={() => addNode("action")}>
+              <ActionIcon style={{ color: "#388E3C" }} />
+              <Typography variant="body2">Ação Automatizada</Typography>
+            </div>
+          </Tooltip>
+
+          <Tooltip title="Atrasa a próxima ação do fluxo por um período determinado de segundos, minutos, horas ou dias." placement="right" arrow>
+            <div className={classes.sidebarItem} onClick={() => addNode("timer")}>
+              <TimerIcon style={{ color: "#FF8F00" }} />
+              <Typography variant="body2">Temporizador</Typography>
+            </div>
+          </Tooltip>
+
+          <Tooltip title="Faz uma chamada HTTP (GET/POST) externa para integrar dados com outros sistemas externos." placement="right" arrow>
+            <div className={classes.sidebarItem} onClick={() => addNode("api_request")}>
+              <ApiIcon style={{ color: "#3F51B5" }} />
+              <Typography variant="body2">Integração API</Typography>
+            </div>
+          </Tooltip>
+
+          <Divider style={{ margin: "16px 0" }} />
+          <Paper style={{ padding: "12px", backgroundColor: "rgba(0, 0, 0, 0.04)", borderRadius: 4 }}>
+            <Typography variant="caption" style={{ fontWeight: "bold", display: "block", marginBottom: 4 }}>
+              💡 Dica Rápida:
+            </Typography>
+            <Typography variant="caption" color="textSecondary" style={{ display: "block", fontSize: "0.75rem", lineHeight: 1.3 }}>
+              Arraste o círculo cinza (saída) de um bloco até o círculo do outro bloco (entrada) para conectá-los. Clique em uma linha de conexão para removê-la.
+            </Typography>
+          </Paper>
         </div>
 
         {/* Builder Canvas viewport */}

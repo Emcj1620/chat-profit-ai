@@ -13,6 +13,10 @@ import Typography from "@material-ui/core/Typography";
 import Avatar from "@material-ui/core/Avatar";
 import Divider from "@material-ui/core/Divider";
 import Badge from "@material-ui/core/Badge";
+import IconButton from "@material-ui/core/IconButton";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 import { i18n } from "../../translate/i18n";
 
@@ -129,6 +133,66 @@ const TicketListItem = ({ ticket }) => {
 			isMounted.current = false;
 		};
 	}, []);
+
+	const [stages, setStages] = useState([]);
+	const [menuAnchor, setMenuAnchor] = useState(null);
+
+	const handleOpenMenu = async e => {
+		e.stopPropagation();
+		setMenuAnchor(e.currentTarget);
+		try {
+			const { data } = await api.get("/kanban/stages");
+			setStages(data || []);
+		} catch (err) {
+			console.error("Error loading stages in shortcut menu:", err);
+		}
+	};
+
+	const handleCloseMenu = e => {
+		if (e) e.stopPropagation();
+		setMenuAnchor(null);
+	};
+
+	const handleSelectStage = async (e, stageId) => {
+		e.stopPropagation();
+		handleCloseMenu();
+		try {
+			await api.put(`/tickets/${ticket.id}/kanban`, { stageId });
+			ticket.kanbanStageId = stageId;
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
+	const handleCloseTicket = async e => {
+		e.stopPropagation();
+		handleCloseMenu();
+		try {
+			await api.put(`/tickets/${ticket.id}`, {
+				status: "closed",
+				userId: user?.id,
+			});
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
+	const handleAddTag = async e => {
+		e.stopPropagation();
+		handleCloseMenu();
+		const tagName = window.prompt("Digite o nome da etiqueta (Tag) para adicionar:");
+		if (!tagName) return;
+		try {
+			const currentTags = ticket.contact.tags ? ticket.contact.tags.split(",").map(t => t.trim()) : [];
+			if (!currentTags.includes(tagName)) {
+				const merged = [...currentTags, tagName].filter(Boolean).join(",");
+				await api.put(`/contacts/${ticket.contact.id}`, { tags: merged });
+				ticket.contact.tags = merged;
+			}
+		} catch (err) {
+			toastError(err);
+		}
+	};
 
 	const handleAcepptTicket = async id => {
 		setLoading(true);
@@ -253,6 +317,40 @@ const TicketListItem = ({ ticket }) => {
 					>
 						{i18n.t("ticketsList.buttons.accept")}
 					</ButtonWithSpinner>
+				)}
+				{ticket.status !== "pending" && (
+					<>
+						<IconButton
+							size="small"
+							onClick={handleOpenMenu}
+							style={{ marginLeft: 8 }}
+						>
+							<MoreVertIcon fontSize="small" />
+						</IconButton>
+						<Menu
+							anchorEl={menuAnchor}
+							keepMounted
+							open={Boolean(menuAnchor)}
+							onClose={handleCloseMenu}
+						>
+							<MenuItem onClick={handleCloseTicket}>
+								Encerrar Atendimento
+							</MenuItem>
+							<MenuItem onClick={handleAddTag}>
+								Adicionar Etiqueta (Tag)
+							</MenuItem>
+							{stages.length > 0 && <Divider />}
+							{stages.map(s => (
+								<MenuItem
+									key={s.id}
+									onClick={e => handleSelectStage(e, s.id)}
+									selected={ticket.kanbanStageId === s.id}
+								>
+									Mover para: {s.name}
+								</MenuItem>
+							))}
+						</Menu>
+					</>
 				)}
 			</ListItem>
 			<Divider variant="inset" component="li" />

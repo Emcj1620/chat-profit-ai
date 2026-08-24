@@ -17,6 +17,7 @@ import Campaign from "../models/Campaign";
 import CampaignContact from "../models/CampaignContact";
 import CampaignWhatsapp from "../models/CampaignWhatsapp";
 import ChatFlow from "../models/ChatFlow";
+import Webhook from "../models/Webhook";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -42,7 +43,8 @@ const models = [
   Campaign,
   CampaignContact,
   CampaignWhatsapp,
-  ChatFlow
+  ChatFlow,
+  Webhook
 ];
 
 sequelize.addModels(models);

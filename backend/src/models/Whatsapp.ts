@@ -100,6 +100,30 @@ class Whatsapp extends Model<Whatsapp> {
   @Column(DataType.FLOAT)
   gptTemperature: number;
 
+  @Default(false)
+  @Column
+  typebotEnabled: boolean;
+
+  @AllowNull
+  @Column(DataType.TEXT)
+  typebotUrl: string;
+
+  @AllowNull
+  @Column(DataType.TEXT)
+  typebotName: string;
+
+  @AllowNull
+  @Column(DataType.TEXT)
+  typebotViewerId: string;
+
+  @Default(false)
+  @Column
+  n8nEnabled: boolean;
+
+  @AllowNull
+  @Column(DataType.TEXT)
+  n8nUrl: string;
+
   @CreatedAt
   createdAt: Date;
 

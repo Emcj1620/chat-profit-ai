@@ -323,6 +323,87 @@ export const handleMessage = async (
 
     await processVcardMessage(processedMessage);
 
+    // 1. Typebot Integration
+    if (
+      whatsapp.typebotEnabled &&
+      whatsapp.typebotUrl &&
+      whatsapp.typebotName &&
+      !contextPayload.groupContact &&
+      !processedMessage.fromMe &&
+      !ticket.userId
+    ) {
+      try {
+        const { RunTypebot } = require("../services/IntegrationServices/TypebotIntegration");
+        const replies = await RunTypebot(ticket, processedMessage.body, whatsapp.typebotUrl, whatsapp.typebotName);
+
+        for (const reply of replies) {
+          const sentMessage = await whatsappProvider.sendMessage(
+            contextPayload.whatsappId,
+            `${contactPayload.number}@c.us`,
+            reply.value
+          );
+
+          if (sentMessage) {
+            const replyMessageData = {
+              id: sentMessage.id,
+              ticketId: ticket.id,
+              contactId: undefined,
+              body: reply.value,
+              fromMe: true,
+              read: true,
+              mediaType: reply.type === "text" ? "chat" : reply.type,
+              ack: 1
+            };
+            const CreateMessageService = require("../services/MessageServices/CreateMessageService").default;
+            await CreateMessageService({ messageData: replyMessageData });
+          }
+        }
+        return;
+      } catch (err: any) {
+        logger.error(`Error running Typebot integration: ${err.message}`);
+      }
+    }
+
+    // 2. n8n Integration
+    if (
+      whatsapp.n8nEnabled &&
+      whatsapp.n8nUrl &&
+      !contextPayload.groupContact &&
+      !processedMessage.fromMe &&
+      !ticket.userId
+    ) {
+      try {
+        const { RunN8n } = require("../services/IntegrationServices/N8nIntegration");
+        const reply = await RunN8n(ticket, processedMessage.body, whatsapp.n8nUrl);
+
+        if (reply) {
+          const sentMessage = await whatsappProvider.sendMessage(
+            contextPayload.whatsappId,
+            `${contactPayload.number}@c.us`,
+            reply
+          );
+
+          if (sentMessage) {
+            const replyMessageData = {
+              id: sentMessage.id,
+              ticketId: ticket.id,
+              contactId: undefined,
+              body: reply,
+              fromMe: true,
+              read: true,
+              mediaType: "chat",
+              ack: 1
+            };
+            const CreateMessageService = require("../services/MessageServices/CreateMessageService").default;
+            await CreateMessageService({ messageData: replyMessageData });
+          }
+        }
+        return;
+      } catch (err: any) {
+        logger.error(`Error running n8n integration: ${err.message}`);
+      }
+    }
+
     if (
       whatsapp.gptEnabled &&
       whatsapp.gptApiKey &&
